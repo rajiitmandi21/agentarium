@@ -12,7 +12,34 @@ dispatch currently requires the optional local API.
 [MIT license](LICENSE) · [Contributing](CONTRIBUTING.md)
 
 Source: [rajiitmandi21/agentarium](https://github.com/rajiitmandi21/agentarium).
-Hosted app target: [Agentarium](https://rajiitmandi21.github.io/agentarium/).
+**Open the hosted app:** [Agentarium](https://rajiitmandi21.github.io/agentarium/).
+No installation or server is needed. Hosting is free on GitHub Pages.
+
+## Connect your data and switch phases
+
+1. Open the app and select **Connect your data**.
+2. In Chrome or Edge, choose your repository root or `project-management/`
+   folder. Grant access when prompted. For a task-only view, select its `status/`
+   folder. Other browsers can import phase JSON files instead.
+3. Include all the phases you want to browse: `data_p1.json`, `data_p2.json`,
+   and so on. Select multiple files together when importing JSON snapshots.
+4. Use the **P1 / P2 / …** dropdown in the top toolbar to switch phases.
+   The dropdown lists phases loaded for the selected project; use the adjacent
+   project dropdown to change projects.
+5. Open **Khira**, enable **Edit**, and edit tasks. Drafts stay in this browser.
+   For a linked folder, **Save** writes the selected phase back to disk. For JSON
+   snapshots, **Export** downloads the selected phase with its edits.
+
+**Refresh from source** reloads linked folder data after external changes.
+Snapshots use **Re-import JSON** because the browser cannot reread an imported
+file automatically. Your project files remain on your device; this release
+does not upload them or synchronize them across devices. Folder access can
+require reconnecting after a browser restart.
+
+Available: task editing, project/phase switching, project views, and local
+save/export. **Upcoming:** plan, message and decision authoring, independent
+verdict submission, cloud synchronization, and real agent execution. Maestro
+is a simulation preview in the hosted app.
 
 ```sh
 npm ci
@@ -81,7 +108,7 @@ Agentarium API operations.
 
 1. Start Agentarium and click **Add project**.
 2. **Pick folder** — choose the **repo root** (recommended; discovers `project-management/status/`), **`project-management/`**, or **`project-management/status/`** for Khira-only.
-3. Use **Refresh from disk** after agents edit `project-management/status/data_p1.json`.
+3. Use **Refresh from source** after agents edit `project-management/status/data_p1.json`.
 
 Built-in sample data ships in `data.js`; use folder import to track real projects.
 
@@ -99,7 +126,7 @@ For **folder-linked** projects (Pick folder), edit PM-safe fields in the Khira U
 
 - Snapshot and built-in projects: **Export** only (no Save).
 - Re-pick the folder if Save reports permission or reconnect errors.
-- Existing linked projects may need **Refresh from disk** once to pick up `relativePath` metadata after migration.
+- Existing linked projects may need **Refresh from source** once to pick up `relativePath` metadata after migration.
 
 ## Validation scripts
 
