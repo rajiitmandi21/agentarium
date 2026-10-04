@@ -1,0 +1,254 @@
+{
+  "$schema": "https://agentarium.dev/schemas/roles-v1.json",
+  "version": "1.0.0",
+  "last_updated": "2026-05-26T19:31:51Z",
+  "roles": [
+    {
+      "id": "human-raj",
+      "displayName": "Raj Kumar",
+      "type": "human",
+      "summary": "Final human owner and operator of Agentarium projects.",
+      "responsibilities": [
+        "Own product direction and final approvals",
+        "Coordinate agent handoffs and crew assignments",
+        "Record decisions and supersede stale verdicts"
+      ],
+      "defaultPermissions": {
+        "tasks": [
+          "read",
+          "edit",
+          "save",
+          "verdict"
+        ],
+        "plans": [
+          "read",
+          "edit",
+          "create"
+        ],
+        "messages": [
+          "read",
+          "create"
+        ],
+        "decisions": [
+          "read",
+          "create",
+          "supersede"
+        ],
+        "roles": [
+          "read",
+          "assign"
+        ],
+        "verdicts": [
+          "read",
+          "approve",
+          "reject"
+        ],
+        "runs": [
+          "append"
+        ]
+      },
+      "isFinalOwner": true
+    },
+    {
+      "id": "sdp",
+      "displayName": "Senior Director of Product",
+      "type": "persona",
+      "summary": "Product direction, scope framing, and strategic trade-offs.",
+      "responsibilities": [
+        "Set product intent and non-negotiables",
+        "Approve or reject major scope changes",
+        "Write product-direction Signal Courier messages"
+      ],
+      "defaultPermissions": {
+        "tasks": [
+          "read",
+          "comment",
+          "verdict"
+        ],
+        "plans": [
+          "read",
+          "edit",
+          "create"
+        ],
+        "messages": [
+          "read",
+          "create"
+        ],
+        "decisions": [
+          "read",
+          "propose"
+        ],
+        "roles": [
+          "read"
+        ],
+        "verdicts": [
+          "read",
+          "approve",
+          "reject"
+        ],
+        "runs": [
+          "append"
+        ]
+      }
+    },
+    {
+      "id": "spm",
+      "displayName": "Senior Product Manager",
+      "type": "persona",
+      "summary": "Task shaping, acceptance criteria, and PM verdicts.",
+      "responsibilities": [
+        "Break plans into Khira tasks with clear acceptance",
+        "Set pm_status and pm_remark on tasks",
+        "Request reviews and route work to implementation agents"
+      ],
+      "defaultPermissions": {
+        "tasks": [
+          "read",
+          "edit",
+          "verdict"
+        ],
+        "plans": [
+          "read",
+          "edit"
+        ],
+        "messages": [
+          "read",
+          "create"
+        ],
+        "decisions": [
+          "read",
+          "propose"
+        ],
+        "roles": [
+          "read"
+        ],
+        "verdicts": [
+          "read",
+          "approve",
+          "reject",
+          "needs-review"
+        ],
+        "runs": [
+          "append"
+        ]
+      }
+    },
+    {
+      "id": "tl",
+      "displayName": "Tech Lead",
+      "type": "persona",
+      "summary": "Architecture review, engineering direction, and technical verdicts.",
+      "responsibilities": [
+        "Review implementation approach and code quality",
+        "Flag architectural blockers and security risks",
+        "Approve or reject engineering deliverables"
+      ],
+      "defaultPermissions": {
+        "tasks": [
+          "read",
+          "comment",
+          "verdict"
+        ],
+        "plans": [
+          "read",
+          "comment"
+        ],
+        "messages": [
+          "read",
+          "create"
+        ],
+        "decisions": [
+          "read",
+          "propose"
+        ],
+        "roles": [
+          "read"
+        ],
+        "verdicts": [
+          "read",
+          "approve",
+          "reject"
+        ],
+        "runs": [
+          "append"
+        ]
+      }
+    },
+    {
+      "id": "fe",
+      "displayName": "Frontend Agent",
+      "type": "agent",
+      "summary": "Frontend implementation agent (UI, components, static app surfaces).",
+      "responsibilities": [
+        "Implement UI and client-side behavior from plans and handoffs",
+        "Update Khira task status and code_updated_at after delivery",
+        "Send completion handoffs via Signal Courier"
+      ],
+      "defaultPermissions": {
+        "tasks": [
+          "read",
+          "edit",
+          "comment"
+        ],
+        "plans": [
+          "read"
+        ],
+        "messages": [
+          "read",
+          "create"
+        ],
+        "decisions": [
+          "read"
+        ],
+        "roles": [
+          "read"
+        ],
+        "verdicts": [
+          "read"
+        ],
+        "runs": [
+          "append"
+        ]
+      },
+      "isImplementationAgent": true
+    },
+    {
+      "id": "be",
+      "displayName": "Backend / Data Agent",
+      "type": "agent",
+      "summary": "Backend, data, API, and integration implementation agent.",
+      "responsibilities": [
+        "Implement backend, data, and API work from plans and handoffs",
+        "Update Khira task status and code_updated_at after delivery",
+        "Send completion handoffs via Signal Courier"
+      ],
+      "defaultPermissions": {
+        "tasks": [
+          "read",
+          "edit",
+          "comment"
+        ],
+        "plans": [
+          "read"
+        ],
+        "messages": [
+          "read",
+          "create"
+        ],
+        "decisions": [
+          "read"
+        ],
+        "roles": [
+          "read"
+        ],
+        "verdicts": [
+          "read"
+        ],
+        "runs": [
+          "append"
+        ]
+      },
+      "isImplementationAgent": true
+    }
+  ]
+}

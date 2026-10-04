@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project Status Schema",
+  "description": "Status file shape. additionalProperties:true at every object level - new optional keys can be added without bumping the schema. Update this file ONLY when the required set changes or an enum needs a new value.",
+  "type": "object",
+  "required": ["title", "subtitle", "last_updated", "human_reviews", "tasks"],
+  "additionalProperties": true,
+  "properties": {
+    "title": { "type": "string" },
+    "subtitle": { "type": "string" },
+    "last_updated": { "type": "string", "description": "ISO timestamp of the most recent status update" },
+    "human_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text"],
+        "additionalProperties": true,
+        "properties": {
+          "date": { "type": "string" },
+          "at": { "type": "string" },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status", "priority", "blockers", "reviews", "subtasks"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "enum": ["completed", "in_progress", "todo", "blocked"] },
+          "priority": { "enum": ["p0", "p1", "p2", "pl"] },
+          "pm_status": { "enum": ["", "done", "tested", "needs-review", "rejected", "superseded"] },
+          "pm_remark": { "type": "string" },
+          "needs": { "enum": ["help", "decision", "crew", "access"], "description": "Soft, non-blocking triage signal - task is moving but the owner wants attention. Distinct from status:blocked." },
+          "waiting_on": { "type": "string", "description": "Optional free-text/role the task is waiting on, e.g. \"human\" or a Crews role id. Companion to needs." },
+          "code_updated_at": { "type": "string" },
+          "pm_updated_at": { "type": "string" },
+          "description": { "type": "string" },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "required": ["text", "needs", "severity"],
+                  "additionalProperties": true,
+                  "properties": {
+                    "text":     { "type": "string" },
+                    "needs":    { "enum": ["help", "decision", "crew", "access"] },
+                    "severity": { "enum": ["p0", "p1", "p2"] },
+                    "raised_at": { "type": "string", "description": "ISO timestamp; engine parses with Date.parse only" },
+                    "owner_id": { "type": "string" }
+                  }
+                }
+              ]
+            }
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "text"],
+              "additionalProperties": true,
+              "properties": {
+                "type": { "enum": ["BUG", "PLAN", "NOTE", "CLEANUP"] },
+                "text": { "type": "string" },
+                "at": { "type": "string" }
+              }
+            }
+          },
+          "subtasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["status", "text"],
+              "additionalProperties": true,
+              "properties": {
+                "status": { "enum": ["completed", "in_progress", "todo"] },
+                "text": { "type": "string" },
+                "review": {
+                  "oneOf": [
+                    { "type": "null" },
+                    {
+                      "type": "object",
+                      "required": ["type", "text"],
+                      "additionalProperties": true,
+                      "properties": {
+                        "type": { "enum": ["BUG", "PLAN", "NOTE", "CLEANUP"] },
+                        "text": { "type": "string" },
+                        "at": { "type": "string" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

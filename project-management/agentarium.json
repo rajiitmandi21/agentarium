@@ -1,0 +1,6 @@
+{
+  "product": "Agentarium",
+  "version": "0.3.0",
+  "projectManagementRoot": "project-management/",
+  "sourceMode": "local-folder"
+}

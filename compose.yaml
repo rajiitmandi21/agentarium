@@ -1,0 +1,40 @@
+name: agentarium
+
+services:
+  agentarium:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: agentarium-local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${AGENTARIUM_PORT:-4747}:4747"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4747
+    volumes:
+      - type: bind
+        source: ./project-management
+        target: /app/project-management
+      - maestro-checkpoints:/var/lib/agentarium/maestro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "const http=require('http');const r=http.get('http://127.0.0.1:4747/api/health',s=>{s.resume();process.exit(s.statusCode===200?0:1)});r.on('error',()=>process.exit(1));r.setTimeout(2000,()=>{r.destroy();process.exit(1)})"
+      interval: 5s
+      timeout: 3s
+      start_period: 3s
+      retries: 10
+
+volumes:
+  maestro-checkpoints:

@@ -1,0 +1,15 @@
+{
+  "statusFiles": [
+    "data_p1.json"
+  ],
+  "planFiles": [
+    "2026-10-04-phase1-demo-workspace.md"
+  ],
+  "messageFiles": [
+    "2026-10-04_0000Z_spm-to-fe_demo-handoff.md"
+  ],
+  "decisionFiles": [
+    "2026-10-04-demo-local-data.md"
+  ],
+  "artifactFiles": []
+}

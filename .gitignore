@@ -1,0 +1,50 @@
+# macOS
+.DS_Store
+
+# Local agent / editor config
+.claude/
+.vscode/settings.json
+
+# Node (Playwright / smoke tests)
+node_modules/
+dist/
+release/
+.wrangler/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Playwright output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Legacy root symlinks → project-management/ (track data under project-management/ only)
+/messages
+/plans
+/status
+
+# Codex local artifacts (project skills live in .codex/skills/ — track those if desired)
+.codex/skills.zip
+
+# Duplicate upload snapshot (same content as uploads/index.html)
+uploads/index-2cdd2dd1.html
+
+# Local status-update backup snapshots (working artifacts, not source)
+backups/
+
+# Maestro runtime stores (AG-P11.5): append-only run/engagement records are
+# LOCAL runtime output written by conducting runs (and by browser smoke tests),
+# not authored source. Keep the dirs (.gitkeep) but ignore the generated records.
+project-management/runs/*
+!project-management/runs/.gitkeep
+project-management/engagements/*
+!project-management/engagements/.gitkeep

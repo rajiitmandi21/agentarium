@@ -1,0 +1,898 @@
+/* ═════════════════════════════════════════════════════════════════════════
+   ATLAS — lens-cockpit, realigned to the house design language
+   ─────────────────────────────────────────────────────────────────────────
+   Composed from the existing Agentarium kit (styles.css + agentarium/styles.css).
+   The ONLY genuinely Atlas-specific rendering is the dependency graph (Map),
+   and even that is recolored to the module-hue system. Everything else reuses
+   house components: .modhead / .viewbar+.view-tabs / .kpi / .card / .chip /
+   .mode-toggle / .afc / .role-av / .tr-status / .activity-item / .btn.
+   The .atlas- namespace is kept for LAYOUT only — never to re-skin a component
+   the kit already provides.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Node hue = the OWNING artifact's MODULE hue (brief). No separate graph palette. */
+  --atlas-task:     var(--mod-khira);     /* 260 */
+  --atlas-plan:     var(--mod-plan);      /* 195 */
+  --atlas-message:  var(--mod-courier);   /* 60  */
+  --atlas-decision: var(--mod-ledger);    /* 20  */
+  --atlas-verdict:  var(--mod-verdict);   /* 300 */
+  --atlas-phase:    250;                   /* structural slate — lanes, not bubbles */
+
+  --atlas-insp-w: 360px;
+  --atlas-lane-w: 250px;
+}
+
+/* ── Shell ─────────────────────────────────────────────────────────────── */
+.atlas {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+}
+.atlas-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+.atlas-work {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The module header's meta line (updated / edge counts) */
+.atlas-headmeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+  margin-top: 6px;
+}
+.atlas-headmeta .sep { color: var(--text-4); }
+.atlas-headmeta strong { color: var(--text-2); font-weight: 600; }
+.atlas-headmeta .inf { color: var(--pr-p1); }
+.atlas-live { display: inline-flex; align-items: center; gap: 5px; }
+.atlas-live i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--st-completed); box-shadow: 0 0 0 3px var(--st-completed-bg);
+}
+
+/* viewbar-right cluster (search / filters / inferred toggle) */
+.atlas-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.atlas-search {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0 10px; height: 32px; color: var(--text-3); min-width: 200px;
+}
+.atlas-search input {
+  border: none; background: transparent; outline: none; font: inherit;
+  font-size: 12.5px; color: var(--text); flex: 1; min-width: 0;
+}
+.atlas-search .kbd {
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-4);
+  border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px;
+}
+
+/* ── Filters popover (house .phase-popover shape, .chip contents) ───────── */
+.atlas-pop-wrap { position: relative; }
+.atlas-filter-pop {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 100;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: var(--shadow-2);
+  width: 320px; overflow: hidden;
+}
+.atlas-filter-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--text-3); font-weight: 700;
+}
+.atlas-filter-head button {
+  border: none; background: transparent; color: var(--accent-text);
+  font: inherit; font-family: var(--font-mono); font-size: 9.5px;
+  letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; cursor: pointer;
+}
+.atlas-filter-head button:hover { text-decoration: underline; }
+.atlas-filter-body { padding: 12px; max-height: 60vh; overflow-y: auto; }
+.atlas-filter-group + .atlas-filter-group { margin-top: 14px; }
+.atlas-filter-group > .lab {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-3); font-weight: 700; margin-bottom: 8px;
+}
+.atlas-chiprow { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* a filter-count badge appended to the Filters trigger */
+.atlas-filter-n {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  background: var(--accent); color: oklch(99% 0 0);
+  border-radius: 999px; padding: 0 6px; min-width: 16px; text-align: center;
+}
+
+/* legend popover (same shell) */
+.atlas-legend { display: flex; flex-direction: column; gap: 12px; }
+.atlas-legend .block-lab {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-4); font-weight: 700; margin-bottom: 6px;
+}
+.atlas-legend .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.atlas-legend .item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-2); }
+.atlas-legend .edge-line { width: 22px; height: 0; flex-shrink: 0; border-top: 2px solid var(--text-3); }
+.atlas-legend .edge-line.dashed { border-top-style: dashed; border-color: var(--text-4); }
+.atlas-legend .edge-line.blocked { border-color: var(--st-blocked); }
+
+/* ── PULSE lens ─────────────────────────────────────────────────────────── */
+.pulse-scroll { flex: 1; overflow-y: auto; padding: 18px 28px 60px; }
+.pulse-inner { max-width: 1180px; }
+
+/* KPI orientation strip — house .kpi tiles */
+.atlas-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.atlas-kpis .kpi { cursor: pointer; transition: border-color 120ms, background 120ms; }
+.atlas-kpis .kpi:hover { border-color: var(--border-strong); background: var(--surface); }
+.atlas-kpis .kpi.is-zero { opacity: 0.66; }
+
+/* severity lanes */
+.atlas-lanes { display: flex; flex-direction: column; gap: 26px; }
+.atlas-lane-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.atlas-lane-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; font-weight: 700; color: var(--text-2);
+}
+.atlas-lane-eyebrow .sev {
+  width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
+}
+.atlas-lane-eyebrow .sev.critical { background: var(--st-blocked); }
+.atlas-lane-eyebrow .sev.high { background: var(--pr-p1); }
+.atlas-lane-eyebrow .sev.medium { background: var(--st-progress); }
+.atlas-lane-eyebrow .sev.resolved { background: var(--st-completed); }
+.atlas-lane-count {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--text-3); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px;
+}
+.atlas-lane-desc { font-size: 12px; color: var(--text-3); margin-left: auto; }
+
+.atlas-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+
+/* attention card = house .card + severity left-border; hover = bg change (not transform) */
+.atlas-card {
+  border-left: 3px solid var(--sev-color, var(--border-strong));
+  padding: 13px 15px;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.atlas-card:hover { background: var(--surface-2); }
+.atlas-card.sel { background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--accent); }
+.atlas-card.crit { --sev-color: var(--st-blocked); }
+.atlas-card.high { --sev-color: var(--pr-p1); }
+.atlas-card.med  { --sev-color: var(--st-progress); }
+.atlas-card.resolved { --sev-color: var(--st-completed); }
+
+/* Live status reflection (AG-P14.1): an item that transitioned OUT of risk on
+   the last refresh fades out with a "just resolved" badge before it leaves the
+   board. GPU-friendly (opacity + translateY only); keyed off the resolved lane,
+   not a JS teardown timer that would fight the deterministic render. */
+.atlas-card.just-resolved {
+  --sev-color: var(--st-completed);
+  background: oklch(from var(--st-completed) l c h / 0.06);
+  will-change: opacity, transform;
+  animation: atlas-just-resolved 1.35s ease-out forwards;
+}
+.just-resolved-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.01em; text-transform: lowercase;
+  color: var(--st-completed);
+  background: oklch(from var(--st-completed) l c h / 0.12);
+  border: 1px solid oklch(from var(--st-completed) l c h / 0.4);
+  border-radius: 999px; padding: 1px 8px; white-space: nowrap;
+}
+@keyframes atlas-just-resolved {
+  0%   { opacity: 1; transform: translateY(0); }
+  70%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-card.just-resolved { animation: none; opacity: 0.7; }
+}
+.atlas-card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.atlas-card-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.35; letter-spacing: -0.005em; }
+.atlas-card-why { font-size: 12px; color: var(--text-2); line-height: 1.45; }
+.atlas-card-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.atlas-owner { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-3); }
+
+/* next-action affordance inside a card */
+.atlas-next {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; color: var(--accent-text);
+}
+.atlas-card:hover .atlas-next { text-decoration: underline; }
+
+/* a small priority chip (reuses .chip metrics, stoplight color) */
+.atlas-prio {
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.08em; padding: 1px 6px; border-radius: 4px; color: oklch(99% 0 0);
+}
+.atlas-prio.p0 { background: var(--pr-p0); }
+.atlas-prio.p1 { background: var(--pr-p1); }
+.atlas-prio.p2 { background: var(--pr-p2); }
+.atlas-prio.pl { background: var(--pr-pl); }
+
+/* ── DECISIONS lens ─────────────────────────────────────────────────────── */
+.dec-scroll { flex: 1; overflow-y: auto; padding: 18px 28px 80px; }
+.dec-inner { max-width: 840px; }
+.dec-intro {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.dec-intro .lead { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+.dec-intro .lead strong { color: var(--text); font-weight: 600; }
+
+.dec-list { display: flex; flex-direction: column; gap: 12px; }
+.dec-card { padding: 0; overflow: hidden; transition: opacity 200ms; }
+.dec-card.decided { opacity: 0.7; }
+.dec-card-main { display: flex; gap: 14px; padding: 16px 18px; }
+.dec-rank {
+  flex-shrink: 0; width: 30px; text-align: center;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--text-4);
+  padding-top: 2px;
+}
+.dec-rank .hash { font-size: 9px; color: var(--text-4); }
+.dec-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+.dec-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dec-title { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; color: var(--text); }
+.dec-why { font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
+.dec-why .quote {
+  border-left: 2px solid var(--border-strong); padding-left: 10px;
+  color: var(--text-2); font-style: italic;
+}
+.dec-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-3); }
+.dec-meta .who { display: inline-flex; align-items: center; gap: 6px; }
+
+/* gates panel — the leverage of this decision */
+.dec-gates {
+  flex-shrink: 0; width: 132px;
+  border-left: 1px solid var(--border); padding-left: 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.dec-gates .g-val {
+  font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+.dec-gates .g-val.hot { color: var(--st-blocked); }
+.dec-gates .g-lab {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-3); font-weight: 700;
+}
+.dec-gates .g-meter { display: flex; gap: 2px; height: 6px; margin-top: 6px; }
+.dec-gates .g-meter i { flex: 1; background: var(--surface-3); border-radius: 1px; }
+.dec-gates .g-meter i.on { background: var(--st-blocked); }
+.dec-gates .g-meter i.on.low { background: var(--st-progress); }
+
+/* action bar */
+.dec-actions {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border-top: 1px solid var(--border); background: var(--surface);
+}
+.dec-actions .btn { white-space: nowrap; }
+.dec-reason .row .btn { white-space: nowrap; }
+.dec-actions .spacer { flex: 1; }
+.dec-actions .trail-toggle {
+  border: none; background: transparent; color: var(--text-3);
+  font: inherit; font-size: 11.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+}
+.dec-actions .trail-toggle:hover { color: var(--text); }
+
+/* reject reason note (inline) */
+.dec-reason {
+  padding: 12px 18px 14px; border-top: 1px solid var(--border);
+  background: var(--st-blocked-bg);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.dec-reason .lab {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--err-ink); font-weight: 700;
+}
+.dec-reason textarea {
+  width: 100%; resize: vertical; min-height: 56px; font: inherit; font-size: 12.5px;
+  color: var(--text); background: var(--bg-elev); border: 1px solid var(--err-line);
+  border-radius: 8px; padding: 9px 11px; outline: none;
+}
+.dec-reason textarea:focus { border-color: var(--err-ink); }
+.dec-reason .row { display: flex; gap: 8px; }
+
+/* decided banner */
+.dec-decided {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+}
+.dec-decided .msg { font-size: 12.5px; color: var(--text-2); }
+.dec-decided .msg strong { color: var(--text); font-weight: 600; }
+.dec-decided .undo {
+  margin-left: auto; border: none; background: transparent;
+  color: var(--accent-text); font: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+}
+.dec-decided .undo:hover { text-decoration: underline; }
+
+/* verdict trail (house .activity-item) revealed under a decision */
+.dec-trail { padding: 4px 18px 14px; border-top: 1px solid var(--border); }
+.dec-trail .activity-item { grid-template-columns: auto 1fr auto; }
+
+/* undo toast */
+.atlas-toast {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 14px; z-index: 50;
+  background: var(--text); color: var(--bg-elev);
+  border-radius: 10px; padding: 10px 14px; box-shadow: var(--shadow-2);
+  font-size: 12.5px; animation: toast-in 160ms ease;
+}
+.atlas-toast .t-stamp {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+}
+.atlas-toast .t-stamp.approved { background: var(--ok-fill); color: oklch(99% 0 0); }
+.atlas-toast .t-stamp.rejected { background: var(--err-fill); color: oklch(99% 0 0); }
+.atlas-toast button {
+  border: none; background: transparent; color: oklch(80% 0.12 240);
+  font: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.atlas-toast button:hover { text-decoration: underline; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ── MAP lens (graph) — the one Atlas-specific render, recolored ─────────── */
+.graph-wrap {
+  flex: 1; min-height: 0; position: relative; overflow: hidden;
+  background:
+    radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0) 0 0 / 26px 26px,
+    var(--bg);
+}
+[data-theme="dark"] .graph-wrap {
+  background:
+    radial-gradient(circle at 1px 1px, oklch(30% 0.01 250) 1px, transparent 0) 0 0 / 26px 26px,
+    var(--bg);
+}
+.graph-svg { width: 100%; height: 100%; display: block; cursor: grab; }
+.graph-svg:active { cursor: grabbing; }
+
+.lane-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  fill: var(--text-3); font-weight: 700;
+}
+.lane-sep { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 4; }
+.lane-band { fill: var(--surface); opacity: 0.5; }
+.lane-band.active { fill: var(--m-tint); opacity: 0.6; }
+
+/* edges */
+.gedge { fill: none; stroke: var(--text-4); stroke-width: 1.3; opacity: 0.45; transition: opacity 120ms, stroke 120ms, stroke-width 120ms; }
+.gedge.inferred { stroke-dasharray: 4 4; opacity: 0.4; }
+.gedge.hot { stroke: var(--accent); opacity: 0.95; stroke-width: 2; }
+.gedge.dim { opacity: 0.07; }
+.gedge.blocked_by { stroke: var(--st-blocked); stroke-width: 1.8; opacity: 0.8; }
+.gedge.blocked_by.dim { opacity: 0.34; }
+
+/* nodes — type via shape + MODULE hue; status via thin ring; risk via badge dot */
+.gnode { cursor: pointer; }
+.gn-shape {
+  fill: var(--bg-elev);
+  stroke: oklch(82% 0.045 var(--gn-hue, 250));
+  stroke-width: 1.5;
+  transition: stroke-width 120ms, filter 120ms;
+}
+[data-theme="dark"] .gn-shape { fill: oklch(25% 0.035 var(--gn-hue, 250)); stroke: oklch(40% 0.05 var(--gn-hue, 250)); }
+.gn-ico { fill: oklch(40% 0.11 var(--gn-hue, 250)); stroke: none; }
+[data-theme="dark"] .gn-ico { fill: oklch(80% 0.10 var(--gn-hue, 250)); }
+.gnode .gn-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600; fill: var(--text-2);
+  text-anchor: middle; pointer-events: none;
+}
+.gnode:hover .gn-shape { stroke-width: 2.5; filter: drop-shadow(0 2px 6px oklch(0% 0 0 / 0.14)); }
+.gnode.sel .gn-shape { stroke-width: 3; stroke: var(--accent); filter: drop-shadow(0 3px 10px oklch(0% 0 0 / 0.2)); }
+.gnode.dim { opacity: 0.2; }
+
+/* status ring + stoplight tokens (brief: reuse --st-*) */
+.gn-ring { fill: none; stroke-width: 2.4; }
+.gn-ring.blocked { stroke: var(--st-blocked); }
+.gn-ring.in_progress { stroke: var(--st-progress); }
+.gn-ring.completed { stroke: var(--st-completed); }
+.gn-ring.todo { stroke: var(--text-4); stroke-dasharray: 2 3; }
+.gn-badge { stroke: var(--bg-elev); stroke-width: 1.5; }
+.gn-badge.needs-review { fill: var(--pr-p1); }
+.gn-badge.rejected { fill: var(--st-blocked); }
+.gn-badge.stale { fill: var(--pr-p1); }
+.gn-badge.bug { fill: var(--st-blocked); }
+
+/* floating controls over the canvas (legit overlays → keep a light elevation) */
+.graph-toolbar { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 5; }
+.graph-hint {
+  position: absolute; bottom: 12px; left: 12px; z-index: 5;
+  font-size: 11px; color: var(--text-3); background: var(--bg-elev);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; box-shadow: var(--shadow-1);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.graph-hint strong { color: var(--text-2); font-weight: 600; }
+.graph-zoom { display: inline-flex; gap: 4px; }
+
+/* edge tooltip */
+.edge-tip {
+  position: absolute; z-index: 8; pointer-events: none;
+  background: var(--text); color: var(--bg-elev); font-size: 11px; font-weight: 500;
+  padding: 5px 9px; border-radius: 6px; box-shadow: var(--shadow-2); max-width: 240px;
+  transform: translate(-50%, -130%);
+}
+.edge-tip .et-type { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; display: block; }
+.edge-tip .et-inf { color: var(--pr-p1); }
+
+/* ── INSPECTOR drawer — composed from .card + .afc + .icon-btn ──────────── */
+.atlas-insp {
+  position: absolute; top: 0; right: 0; bottom: 0; width: var(--atlas-insp-w);
+  background: var(--bg-elev); border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-drawer);
+  transform: translateX(100%); transition: transform 220ms ease;
+  display: flex; flex-direction: column; min-height: 0; z-index: 20;
+}
+.atlas.insp-open .atlas-insp { transform: translateX(0); }
+.atlas-insp-head { padding: 16px 16px 14px; border-bottom: 1px solid var(--border); position: relative; }
+.atlas-insp-head .close { position: absolute; top: 12px; right: 12px; }
+.atlas-insp-kind { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.atlas-insp-id { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); }
+.atlas-insp-head h2 { margin: 4px 0 0; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3; color: var(--text); padding-right: 32px; }
+.atlas-insp-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.atlas-insp-body { flex: 1; overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+
+/* a kind chip tinted from the module hue */
+.atlas-kindchip {
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px;
+  background: oklch(95% 0.03 var(--k-hue, 250)); color: oklch(42% 0.14 var(--k-hue, 250));
+}
+[data-theme="dark"] .atlas-kindchip { background: oklch(28% 0.06 var(--k-hue, 250)); color: oklch(84% 0.10 var(--k-hue, 250)); }
+
+/* key/value facts inside an inspector card */
+.atlas-kv { display: grid; grid-template-columns: 88px 1fr; gap: 7px 10px; font-size: 12px; }
+.atlas-kv dt { color: var(--text-3); }
+.atlas-kv dd { margin: 0; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.atlas-kv dd .mono { font-family: var(--font-mono); font-size: 11px; }
+.atlas-kv .inferred-tag { font-size: 10px; color: var(--text-4); }
+
+/* source path row */
+.atlas-source {
+  display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 7px 9px; word-break: break-all;
+}
+
+/* connected artifacts — grouped, rendered as .afc chips */
+.atlas-relgroup + .atlas-relgroup { margin-top: 12px; }
+.atlas-relgroup .rg-lab {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 7px;
+  font-size: 11px; font-weight: 600; color: var(--text-2);
+}
+.atlas-relgroup .rg-lab .inf {
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--pr-p1); border: 1px solid var(--pr-p1); border-radius: 3px; padding: 0 3px;
+}
+.atlas-relgroup .rg-lab .n { color: var(--text-4); font-weight: 400; }
+.atlas-afc-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.atlas-afc-wrap .afc { max-width: 100%; }
+.atlas-afc-wrap .afc span:last-child { overflow: hidden; text-overflow: ellipsis; }
+
+/* inspector action buttons reuse .btn; stack full-width */
+.atlas-insp-actions { display: flex; flex-direction: column; gap: 8px; }
+.atlas-insp-actions .btn { width: 100%; justify-content: flex-start; height: 36px; }
+.atlas-insp-actions .btn .sub { margin-left: auto; font-family: var(--font-mono); font-size: 10px; color: var(--text-4); }
+.atlas-insp-actions .btn.primary .sub { color: oklch(100% 0 0 / 0.7); }
+
+/* orphan / no-links state inside the inspector — a finding, not a dead end */
+.atlas-orphan-note { display: flex; flex-direction: column; gap: 8px; }
+.atlas-orphan-note .on-head {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 600; color: var(--pr-p1);
+}
+.atlas-orphan-note p { margin: 0; font-size: 12px; color: var(--text-2); line-height: 1.5; }
+.atlas-orphan-note .mono { font-family: var(--font-mono); font-size: 11px; color: var(--text); }
+.atlas-orphan-note .on-actions { display: flex; gap: 8px; margin-top: 2px; }
+.atlas-orphan-note .on-actions .btn { height: 32px; }
+.atlas-orphan-note .on-foot {
+  font-size: 11px; color: var(--text-3); line-height: 1.5;
+  border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 2px;
+}
+
+/* ── STATES: locked lens / empty / loading / error (house .atlas-state-card) ── */
+.atlas-state { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+.atlas-state-card { max-width: 480px; text-align: center; }
+.atlas-state-card .as-ico {
+  color: var(--text-4); margin-bottom: 16px; display: inline-grid; place-items: center;
+  width: 56px; height: 56px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border);
+}
+.atlas-state-card.locked .as-ico { color: var(--m-ink); background: var(--m-tint); border-color: var(--m-line); }
+.atlas-state-card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; letter-spacing: -0.015em; }
+.atlas-state-card p { margin: 0 0 6px; font-size: 13px; color: var(--text-2); line-height: 1.55; text-wrap: pretty; }
+.atlas-state-card .as-hint { font-size: 12px; color: var(--text-3); }
+.atlas-state-card .as-modules { display: inline-flex; gap: 6px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
+.atlas-state-card .as-mod { font-family: var(--font-mono); font-size: 10.5px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-3); }
+.atlas-state-card .as-mod.have { color: var(--st-completed); border-color: var(--st-completed); background: var(--st-completed-bg); }
+.atlas-state-card .as-cta { margin-top: 18px; display: inline-flex; gap: 8px; justify-content: center; }
+
+/* skeleton */
+.sk { background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%); background-size: 400% 100%; animation: skpulse 1.3s ease-in-out infinite; border-radius: 6px; }
+@keyframes skpulse { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* khira-only guidance banner */
+.atlas-banner {
+  padding: 10px 28px; border-bottom: 1px solid var(--border); background: var(--m-tint);
+  font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 8px;
+}
+.atlas-banner code { background: var(--surface-2); padding: 1px 5px; border-radius: 3px; }
+.atlas-banner strong { color: var(--text); font-weight: 600; }
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .atlas-insp { width: min(360px, 88vw); }
+  .atlas.insp-open .atlas-scrim {
+    display: block; position: absolute; inset: 0; background: oklch(0% 0 0 / 0.3); z-index: 15;
+  }
+  .dec-card-main { flex-wrap: wrap; }
+  .dec-gates { width: 100%; border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 12px; flex-direction: row; align-items: baseline; gap: 10px; }
+  .dec-gates .g-meter { flex: 1; margin-top: 0; }
+}
+.atlas-scrim { display: none; }
+
+@media (max-width: 680px) {
+  .pulse-scroll, .dec-scroll { padding-left: 16px; padding-right: 16px; }
+  .atlas-cards { grid-template-columns: 1fr; }
+  .atlas-lane-desc { display: none; }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   v-final additions — trust, vision, impact, search, command strip,
+   critical-path, Crew, Roadmap
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ── Vision / buildable / live tags ──────────────────────────────────────── */
+.atlas-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+  white-space: nowrap;
+}
+.atlas-tag-vision    { color: var(--pr-pl); background: oklch(95% 0.04 300); border: 1px solid oklch(82% 0.07 300); }
+.atlas-tag-buildable { color: var(--info-ink); background: var(--info-tint); border: 1px solid var(--info-line); }
+.atlas-tag-live      { color: var(--ok-ink); background: var(--ok-tint); border: 1px solid var(--ok-line); }
+[data-theme="dark"] .atlas-tag-vision { background: oklch(28% 0.06 300); border-color: oklch(40% 0.08 300); }
+
+/* ── Trust chip ──────────────────────────────────────────────────────────── */
+.atlas-trust {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3);
+}
+.atlas-trust .dot { width: 7px; height: 7px; border-radius: 50%; }
+.atlas-trust.explicit .dot { background: var(--st-completed); }
+.atlas-trust.inferred { color: var(--pr-p1); }
+.atlas-trust.inferred .dot { background: var(--pr-p1); }
+.atlas-trust.backfilled { color: var(--info-ink); }
+.atlas-trust.backfilled .dot { background: var(--info-fill); }
+
+/* ── Impact bars (affects N) ─────────────────────────────────────────────── */
+.atlas-impact {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+  color: var(--text-2); white-space: nowrap;
+}
+.atlas-impact .bars, .ci-affects .bars { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 12px; }
+.atlas-impact .bars i, .ci-affects .bars i { width: 3px; border-radius: 1px; }
+
+/* ── Search dropdown ─────────────────────────────────────────────────────── */
+.atlas-search-results {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 100; width: 320px;
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: var(--shadow-2); padding: 4px; overflow: hidden;
+}
+.asr-row {
+  display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+  border: none; background: transparent; border-radius: 7px; padding: 7px 9px; cursor: pointer; font: inherit;
+}
+.asr-row.hi, .asr-row:hover { background: var(--surface-2); }
+.asr-row .asr-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+.asr-row .asr-title { font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Focus breadcrumb chip ───────────────────────────────────────────────── */
+.atlas-focuschip {
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 8px 0 10px;
+  border-radius: 8px; background: var(--accent-soft); border: 1px solid oklch(from var(--accent) calc(l + 0.05) calc(c * 0.5) h / 0.5);
+  color: var(--accent-text); font: inherit; cursor: pointer; white-space: nowrap;
+}
+.atlas-focuschip .fc-lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.8; }
+.atlas-focuschip .fc-id { font-family: var(--font-mono); font-size: 11px; font-weight: 700; }
+.atlas-focuschip:hover { filter: brightness(0.98); }
+
+/* ── Map sub-mode toggle row ─────────────────────────────────────────────── */
+.atlas-submodes {
+  display: flex; gap: 6px; padding: 10px 28px; border-bottom: 1px solid var(--border);
+  background: var(--bg-elev); flex-shrink: 0;
+}
+
+/* ── Maestro command strip ───────────────────────────────────────────────── */
+.atlas-cmdstrip {
+  display: flex; align-items: center; gap: 14px; padding: 8px 20px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to right, oklch(from var(--accent) l c h / 0.06), transparent 40%), var(--surface);
+  font-size: 12px; color: var(--text-2); overflow: hidden;
+}
+.atlas-cmdstrip .cs-mark {
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono);
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text);
+  flex-shrink: 0;
+}
+.atlas-cmdstrip .cs-pulse {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--st-completed);
+  box-shadow: 0 0 0 0 oklch(from var(--st-completed) l c h / 0.6); animation: pulse 2.2s infinite;
+}
+.atlas-cmdstrip .cs-stat { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); flex-shrink: 0; white-space: nowrap; }
+.atlas-cmdstrip .cs-stat strong { color: var(--text); }
+.atlas-cmdstrip .cs-feed { display: flex; align-items: center; gap: 14px; overflow: hidden; flex: 1; min-width: 0; }
+.atlas-cmdstrip .cs-agent {
+  display: inline-flex; align-items: center; gap: 7px; border: none; background: transparent;
+  cursor: pointer; font: inherit; color: var(--text-2); white-space: nowrap; min-width: 0;
+}
+.atlas-cmdstrip .cs-agent:hover .cs-now { color: var(--text); }
+.atlas-cmdstrip .cs-now { font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; }
+.atlas-cmdstrip .cs-now em { font-style: normal; color: var(--text-3); }
+.atlas-cmdstrip .cs-await {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; white-space: nowrap;
+  font-size: 11px; font-weight: 600; color: var(--pr-p1);
+}
+.atlas-cmdstrip .cs-spacer { flex: 1; }
+.atlas-cmdstrip .cs-steer { height: 28px; padding: 0 10px; flex-shrink: 0; white-space: nowrap; }
+.atlas-cmdstrip .cs-x { width: 26px; height: 26px; flex-shrink: 0; }
+.atlas-cmdstrip.locked .cs-locked { color: var(--text-3); font-size: 11.5px; }
+
+/* ── Shared vision banner (Crew / Roadmap) ───────────────────────────────── */
+.atlas-vision-banner {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 18px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  font-size: 12px; color: var(--text-2);
+}
+.atlas-vision-banner strong { color: var(--text); font-weight: 600; }
+.atlas-vision-banner .atlas-tag { margin-left: auto; }
+
+/* ── CRITICAL PATH (Map hero) ────────────────────────────────────────────── */
+.cp-scroll { flex: 1; overflow-y: auto; padding: 18px 28px 60px; }
+.cp-inner { max-width: 1080px; }
+.cp-headline {
+  display: flex; align-items: center; gap: 16px; padding: 18px 20px; margin-bottom: 18px;
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+  border-left: 3px solid var(--st-blocked);
+}
+.cp-stat { display: flex; flex-direction: column; align-items: center; line-height: 1; flex-shrink: 0; }
+.cp-stat .cp-n { font-size: 40px; font-weight: 600; letter-spacing: -0.03em; color: var(--text); font-variant-numeric: tabular-nums; }
+.cp-stat .cp-of { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); margin-top: 4px; }
+.cp-head-text { font-size: 16px; color: var(--text); line-height: 1.4; letter-spacing: -0.01em; }
+.cp-head-text strong { color: var(--st-blocked); }
+.cp-head-text .cp-sub { color: var(--text-3); font-size: 13px; }
+
+.cp-list { display: flex; flex-direction: column; gap: 10px; }
+.cp-card { display: flex; gap: 14px; padding: 14px 16px; cursor: pointer; transition: background 120ms; align-items: stretch; }
+.cp-card:hover { background: var(--surface-2); }
+.cp-rank { flex-shrink: 0; width: 24px; font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-4); padding-top: 2px; }
+.cp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.cp-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cp-title { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.005em; line-height: 1.35; }
+.cp-chain { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.cp-chain-lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); }
+.cp-chain svg { color: var(--st-blocked); flex-shrink: 0; }
+.cp-more { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); }
+.cp-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cp-trace { display: inline-flex; align-items: center; gap: 5px; border: none; background: transparent; color: var(--accent-text); font: inherit; font-size: 11px; font-weight: 600; cursor: pointer; }
+.cp-trace:hover { text-decoration: underline; }
+.cp-impact {
+  flex-shrink: 0; width: 116px; border-left: 1px solid var(--border); padding-left: 14px;
+  display: flex; flex-direction: column; gap: 2px; justify-content: center;
+}
+.cp-impact .ci-score { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--st-blocked); font-variant-numeric: tabular-nums; }
+.cp-impact .ci-lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+.cp-impact .ci-affects { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+/* ── CREW ────────────────────────────────────────────────────────────────── */
+.crew-scroll { flex: 1; overflow-y: auto; padding: 18px 28px 60px; }
+.crew-inner { max-width: 1180px; }
+.crew-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.agent-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-top: 3px solid oklch(70% 0.12 var(--rr-hue, 50)); }
+.agent-card.is-me { box-shadow: inset 0 0 0 1px oklch(from var(--r-accent) l c h / 0.4); }
+.agent-head { display: flex; align-items: center; gap: 11px; }
+.agent-id { flex: 1; min-width: 0; }
+.agent-name { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: center; gap: 7px; }
+.agent-you { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--r-ink); background: var(--r-tint); border: 1px solid var(--r-line); padding: 1px 5px; border-radius: 4px; }
+.agent-title { font-size: 11.5px; color: var(--text-3); }
+.agent-head-r { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.agent-kind { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; color: var(--text-3); background: var(--surface-2); border: 1px solid var(--border); }
+.agent-kind.human { color: var(--r-ink); background: var(--r-tint); border-color: var(--r-line); }
+.agent-status { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.agent-status.ok { color: var(--st-completed); }
+.agent-status.info { color: var(--st-progress); }
+.agent-status.off { color: var(--text-4); }
+.agent-now { display: flex; align-items: center; gap: 8px; padding: 9px 11px; background: var(--surface-2); border-radius: 8px; font-size: 12px; }
+.agent-now.dim { opacity: 0.6; }
+.agent-now .an-lab { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); flex-shrink: 0; }
+.agent-now .an-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--st-progress); box-shadow: 0 0 0 0 oklch(from var(--st-progress) l c h / 0.6); animation: pulse 2.2s infinite; }
+.agent-now .an-text { flex: 1; min-width: 0; color: var(--text); }
+.agent-now .atlas-tag { flex-shrink: 0; }
+.agent-load .al-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.agent-load .al-lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+.agent-load .al-nums { font-size: 11.5px; color: var(--text-3); }
+.agent-load .al-bar { height: 7px; border-radius: 4px; background: var(--surface-3); overflow: hidden; position: relative; display: flex; }
+.agent-load .al-bar i.owns { background: var(--text-4); opacity: 0.5; height: 100%; }
+.agent-load .al-bar i.risky { background: var(--pr-p1); height: 100%; }
+.agent-owns .ao-lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+.agent-steer { border-top: 1px solid var(--border); padding-top: 11px; margin-top: 2px; }
+.agent-steer .as-lab { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+.agent-steer .as-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.agent-steer .as-btns .btn { height: 30px; padding: 0 10px; font-size: 12px; }
+
+/* authority chain */
+.authority-card { }
+.auth-chain { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 0 4px; }
+.auth-tier { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.auth-node { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 12px; border: 1px solid oklch(82% 0.05 var(--rr-hue, 50)); background: oklch(97% 0.02 var(--rr-hue, 50)); border-radius: 10px; min-width: 92px; }
+[data-theme="dark"] .auth-node { background: oklch(26% 0.04 var(--rr-hue, 50)); border-color: oklch(40% 0.05 var(--rr-hue, 50)); }
+.auth-node .auth-name { font-size: 12px; font-weight: 600; }
+.auth-node .auth-title { font-size: 10px; color: var(--text-3); }
+.auth-link { display: flex; align-items: center; justify-content: center; height: 26px; position: relative; }
+.auth-link::before { content: ""; width: 1.5px; height: 100%; background: var(--border-strong); }
+.auth-link span { position: absolute; background: var(--bg-elev); padding: 0 6px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); }
+.auth-foot { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); }
+
+/* AG-P13.3 — real resolved persona/tier on the roster + honest unresolved band. */
+.auth-node .auth-tier-lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em; color: var(--text-4); margin-top: 1px; }
+.auth-node .auth-tier-lab.unresolved { color: var(--st-warn, var(--pr-p1)); }
+.auth-node.is-unresolved { border-style: dashed; opacity: 0.82; }
+.auth-unresolved { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.auth-unresolved-lab { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-bottom: 8px; text-align: center; }
+.agent-reports { display: flex; align-items: center; gap: 6px; padding: 4px 2px 0; font-size: 11px; color: var(--text-3); }
+.agent-reports .ar-tier { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2, var(--text-3)); }
+.agent-reports .ar-sep { color: var(--text-4); }
+.agent-reports .ar-to strong { color: var(--text); font-weight: 600; }
+.agent-reports.unresolved .ar-unresolved { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.04em; color: var(--st-warn, var(--pr-p1)); }
+
+/* ── ROADMAP ─────────────────────────────────────────────────────────────── */
+.rm-scroll { flex: 1; overflow-y: auto; padding: 18px 28px 60px; }
+.rm-inner { max-width: 1180px; }
+.rm-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.rm-timeline { padding: 18px 20px 14px; }
+.rm-axis { position: relative; height: 18px; margin-bottom: 8px; border-bottom: 1px dashed var(--border); margin-left: 180px; }
+.rm-tick { position: absolute; top: 0; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--text-4); transform: translateX(-50%); }
+.rm-now-label { position: absolute; top: 0; transform: translateX(-50%); font-family: var(--font-mono); font-size: 9px; font-weight: 700; color: var(--accent-text); }
+.rm-rows { display: flex; flex-direction: column; gap: 10px; }
+.rm-row { display: grid; grid-template-columns: 168px 1fr 96px; gap: 12px; align-items: center; }
+.rm-side { min-width: 0; }
+.rm-side .rm-key { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-3); }
+.rm-side .rm-name { font-size: 12.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.25; }
+.rm-side .rm-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.rm-statepill { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; color: var(--text-3); background: var(--surface-2); border: 1px solid var(--border); }
+.rm-statepill.shipped, .rm-statepill.completed { color: var(--ok-ink); background: var(--ok-tint); border-color: var(--ok-line); }
+.rm-statepill.in_progress, .rm-statepill.active { color: var(--info-ink); background: var(--info-tint); border-color: var(--info-line); }
+.rm-track { position: relative; height: 30px; background: repeating-linear-gradient(to right, var(--paper-line) 0 1px, transparent 1px 60px); border-radius: 6px; }
+.rm-now-line { position: absolute; top: -4px; bottom: -4px; width: 1.5px; background: var(--accent); opacity: 0.5; z-index: 3; }
+.rm-bar { position: absolute; top: 4px; height: 22px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--border-strong); overflow: hidden; display: flex; align-items: center; }
+.rm-bar.st-shipped, .rm-bar.st-completed { border-color: var(--ok-line); }
+.rm-bar.st-active, .rm-bar.st-in_progress { border-color: var(--info-line); }
+.rm-bar.at-risk { border-color: var(--st-blocked); }
+.rm-fill { position: absolute; left: 0; top: 0; bottom: 0; background: oklch(from var(--st-completed) l c h / 0.28); }
+.rm-bar.st-active .rm-fill, .rm-bar.st-in_progress .rm-fill { background: oklch(from var(--st-progress) l c h / 0.28); }
+.rm-bar-lab { position: relative; z-index: 2; font-family: var(--font-mono); font-size: 9.5px; font-weight: 600; color: var(--text-2); padding-left: 8px; }
+.rm-ms { position: absolute; top: 50%; transform: translate(-50%, -50%); z-index: 2; }
+.rm-ms i { display: block; width: 8px; height: 8px; background: var(--pr-pl); transform: rotate(45deg); border: 1px solid var(--bg-elev); }
+.rm-gate { position: absolute; top: -16px; transform: translateX(-4px); display: inline-flex; align-items: center; gap: 3px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.04em; color: var(--text-4); white-space: nowrap; }
+.rm-risk { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.rm-riskbadge { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+.rm-riskbadge.alert { color: var(--err-ink); background: var(--err-tint); }
+.rm-riskbadge.warn { color: var(--pr-p1); background: oklch(96% 0.05 70); }
+.rm-riskbadge.ok { color: var(--ok-ink); background: var(--ok-tint); }
+[data-theme="dark"] .rm-riskbadge.warn { background: oklch(28% 0.06 70); }
+.rm-blk { font-family: var(--font-mono); font-size: 9px; color: var(--st-blocked); }
+.rm-legend { display: flex; gap: 18px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); }
+.rm-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.rm-legend .rm-ms-dot { width: 8px; height: 8px; background: var(--pr-pl); transform: rotate(45deg); }
+.rm-legend .rm-gate-dot { width: 10px; height: 0; border-top: 1.5px solid var(--text-4); }
+.rm-legend .rm-now-dot { width: 1.5px; height: 12px; background: var(--accent); }
+
+@media (max-width: 1100px) {
+  .rm-row { grid-template-columns: 130px 1fr; }
+  .rm-risk { grid-column: 2; flex-direction: row; justify-content: flex-start; }
+  .rm-axis { margin-left: 130px; }
+}
+@media (max-width: 680px) {
+  .cp-card { flex-wrap: wrap; }
+  .cp-impact { width: 100%; border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 10px; flex-direction: row; align-items: baseline; gap: 10px; }
+  .crew-grid { grid-template-columns: 1fr; }
+  .atlas-cmdstrip .cs-feed { display: none; }
+}
+
+/* Embedded (in-shell) Atlas cockpit — render just the .atlas cockpit; the Agentarium shell provides rail/topbar/footer. AG-P6.1 */
+.atlas-embed { position: relative; height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.atlas-embed > .aga-main { flex: 1; min-height: 0; padding: 0; overflow: hidden; }
+
+/* ════════════════ AG-P14.2 — Quality macro lens + Audit + Handoff trace ═════ */
+/* Quality lens (data-quality macro surface) — reuses the .dec-scroll shell. */
+.aq-inner { gap: 16px; }
+.aq-cards { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; margin-top: 4px; }
+.aq-bigcard { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.aq-card-lab { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+.aq-bar { display: flex; height: 16px; border-radius: 8px; overflow: hidden; background: var(--surface-3); border: 1px solid var(--border); }
+.aq-seg { height: 100%; transition: width 240ms ease; }
+.aq-seg.explicit { background: var(--st-completed); }
+.aq-seg.inferred { background: var(--pr-p1); }
+.aq-seg.backfilled { background: var(--info-fill); }
+.aq-legend { display: flex; flex-wrap: wrap; gap: 14px; }
+.aq-legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
+.aq-legend-item strong { color: var(--text); }
+.aq-dot { width: 9px; height: 9px; border-radius: 3px; }
+.aq-dot.explicit { background: var(--st-completed); }
+.aq-dot.inferred { background: var(--pr-p1); }
+.aq-dot.backfilled { background: var(--info-fill); }
+.aq-legend-n { font-family: var(--font-mono); font-size: 10px; color: var(--text-4); }
+.aq-edge-note { font-size: 11px; color: var(--text-3); line-height: 1.4; }
+.aq-ring-row { display: flex; align-items: center; gap: 16px; }
+.aq-donut-track { fill: none; stroke: var(--surface-3); stroke-width: 8; }
+.aq-donut-on { fill: none; stroke: var(--st-completed); stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray 260ms ease; }
+.aq-ring-meta { display: flex; flex-direction: column; gap: 3px; }
+.aq-ring-big { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+.aq-ring-big .aq-pct { font-size: 14px; font-weight: 600; color: var(--text-3); margin-left: 1px; }
+.aq-ring-sub { font-size: 12px; color: var(--text-2); }
+.aq-ring-gap { font-size: 11px; color: var(--text-3); }
+.aq-audit { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.aq-audit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.aq-audit-sub { font-size: 11.5px; color: var(--text-3); margin-top: 4px; max-width: 60ch; }
+.aq-audit-clean { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ok-ink); }
+.aq-audit-list { display: flex; flex-direction: column; gap: 2px; max-height: 320px; overflow: auto; }
+.aq-audit-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; background: transparent; border: 1px solid transparent; cursor: pointer; text-align: left; width: 100%; }
+.aq-audit-row:hover { background: var(--surface-2); border-color: var(--border); }
+.aq-audit-title { flex: 1; font-size: 12.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aq-audit-flags { display: inline-flex; gap: 5px; flex-shrink: 0; }
+.aq-flag { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
+.aq-flag.no-owner { color: var(--st-blocked); background: oklch(from var(--st-blocked) 96% calc(c * 0.3) h); border: 1px solid oklch(from var(--st-blocked) 86% calc(c * 0.4) h); }
+.aq-flag.orphan { color: var(--pr-p1); background: var(--warn-tint); border: 1px solid var(--warn-line); }
+.aq-flag.all-inferred { color: var(--pr-p1); background: oklch(from var(--pr-p1) 96% calc(c * 0.3) h); border: 1px solid oklch(from var(--pr-p1) 86% calc(c * 0.4) h); }
+[data-theme="dark"] .aq-flag.no-owner { background: oklch(from var(--st-blocked) 30% calc(c * 0.5) h); border-color: oklch(from var(--st-blocked) 42% calc(c * 0.6) h); }
+[data-theme="dark"] .aq-flag.all-inferred { background: oklch(from var(--pr-p1) 30% calc(c * 0.5) h); border-color: oklch(from var(--pr-p1) 42% calc(c * 0.6) h); }
+@media (max-width: 860px) { .aq-cards { grid-template-columns: 1fr; } }
+
+/* Audit highlight on the topology graph. */
+.graph-audit-banner { display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 12px; color: var(--text-2); background: var(--warn-tint); border-bottom: 1px solid var(--warn-line); }
+.graph-audit-banner strong { color: var(--warn-ink); }
+.gnode.audit-dim { opacity: 0.18; }
+.gnode.audited .gn-shape { stroke: var(--pr-p1); stroke-width: 2.5; }
+.gnode.audited .gn-label { fill: var(--text); font-weight: 700; }
+
+/* Handoff / evidence-chain trace in the inspector. */
+.atlas-handoff-trace { display: flex; flex-direction: column; gap: 10px; }
+.aht-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.aht-lab { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); min-width: 48px; }
+.aht-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); }
+.aht-resend, .aht-ok { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; padding: 9px 11px; border-radius: 8px; }
+.aht-ok { color: var(--ok-ink); background: var(--ok-tint); border: 1px solid var(--ok-line); }
+.aht-resend { color: var(--warn-ink); background: var(--warn-tint); border: 1px solid var(--warn-line); }
+.aht-resend .btn { margin-left: auto; }
+.atlas-handoff-trace.stale .aht-lab { color: var(--warn-ink); }

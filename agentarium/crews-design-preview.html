@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crews Views — Design Preview (mockup)</title>
+<style>
+:root{
+  --surface: oklch(99% 0.004 95);
+  --surface-2: oklch(97% 0.006 95);
+  --text: oklch(28% 0.02 95);
+  --text-2: oklch(45% 0.02 95);
+  --text-3: oklch(62% 0.02 95);
+  --border: oklch(90% 0.01 95);
+  --border-strong: oklch(82% 0.02 95);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Department hues (persona register — SOFT only) — exact from spec §1 */
+  --dept-exec-hue:285; --dept-tech-hue:255; --dept-product-hue:330;
+  --dept-data-hue:190; --dept-ai-hue:45; --dept-it-hue:125;
+
+  /* status register (saturated) */
+  --ok-hue:168; --warn-hue:70; --info-hue:240; --err-hue:22;
+  --ok-fill: oklch(56% 0.15 var(--ok-hue));
+  --ok-line: oklch(74% 0.10 var(--ok-hue));
+  --warn-fill: oklch(62% 0.16 var(--warn-hue));
+  --info-fill: oklch(56% 0.15 var(--info-hue));
+  --err-fill: oklch(56% 0.18 var(--err-hue));
+}
+[data-theme="dark"]{
+  --surface: oklch(20% 0.01 95);
+  --surface-2: oklch(24% 0.012 95);
+  --text: oklch(92% 0.01 95);
+  --text-2: oklch(75% 0.01 95);
+  --text-3: oklch(58% 0.01 95);
+  --border: oklch(32% 0.012 95);
+  --border-strong: oklch(40% 0.02 95);
+}
+
+/* dept quartet computed from --dept-hue (set per element) — spec §1.2/1.3 */
+.dept{
+  --dept-tint:   oklch(96% 0.03 var(--dept-hue));
+  --dept-line:   oklch(84% 0.06 var(--dept-hue));
+  --dept-ink:    oklch(40% 0.13 var(--dept-hue));
+  --dept-accent: oklch(58% 0.15 var(--dept-hue));
+}
+.dept[data-dept="ai"]{ /* low chroma so it reads bronze, not warning */
+  --dept-tint:   oklch(96% 0.025 var(--dept-hue));
+  --dept-line:   oklch(84% 0.05 var(--dept-hue));
+  --dept-ink:    oklch(42% 0.11 var(--dept-hue));
+  --dept-accent: oklch(58% 0.13 var(--dept-hue));
+}
+[data-theme="dark"] .dept{
+  --dept-tint:   oklch(24% 0.045 var(--dept-hue));
+  --dept-line:   oklch(36% 0.06 var(--dept-hue));
+  --dept-ink:    oklch(82% 0.11 var(--dept-hue));
+  --dept-accent: oklch(70% 0.15 var(--dept-hue));
+}
+[data-theme="dark"] .dept[data-dept="ai"]{
+  --dept-tint:   oklch(24% 0.035 var(--dept-hue));
+  --dept-ink:    oklch(82% 0.09 var(--dept-hue));
+  --dept-accent: oklch(70% 0.12 var(--dept-hue));
+}
+
+*{box-sizing:border-box;}
+body{margin:0;background:var(--surface-2);color:var(--text);font-family:var(--font);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 28px 80px;}
+header.top{display:flex;align-items:center;gap:16px;margin-bottom:6px;}
+header.top h1{font-size:20px;margin:0;letter-spacing:-0.01em;}
+.badge{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;
+  border:1px solid var(--border-strong);color:var(--text-3);border-radius:4px;padding:3px 7px;}
+.sub{color:var(--text-2);margin:2px 0 26px;font-size:13px;}
+.toggle{margin-left:auto;display:flex;gap:6px;}
+.toggle button{font-family:var(--font-mono);font-size:11px;border:1px solid var(--border-strong);
+  background:var(--surface);color:var(--text-2);border-radius:5px;padding:5px 11px;cursor:pointer;}
+.toggle button.on{background:var(--text);color:var(--surface);border-color:var(--text);}
+
+section{margin:34px 0;}
+.sec-h{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--text-3);font-weight:700;margin:0 0 14px;display:flex;align-items:center;gap:10px;}
+.sec-h::after{content:"";flex:1;height:1px;background:var(--border);}
+
+/* ---- palette swatches ---- */
+.pal{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+.swatch{border:1px solid var(--dept-line);border-radius:10px;overflow:hidden;background:var(--surface);}
+.swatch .cap{height:54px;background:var(--dept-tint);display:flex;align-items:flex-end;padding:8px 10px;}
+.swatch .cap b{color:var(--dept-ink);font-size:12px;text-transform:capitalize;}
+.swatch .bar{height:8px;background:var(--dept-accent);}
+.swatch .meta{padding:8px 10px;font-family:var(--font-mono);font-size:10px;color:var(--text-3);}
+.swatch .ring{display:inline-block;width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--dept-accent);vertical-align:-2px;margin-right:5px;}
+
+/* ---- chip ---- */
+.chip{position:relative;width:248px;border:1px solid var(--dept-line);border-radius:10px;
+  background:
+    linear-gradient(0deg, color-mix(in oklch, var(--dept-tint) 38%, transparent), color-mix(in oklch, var(--dept-tint) 38%, transparent)),
+    var(--surface);
+  padding:9px 11px;display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;}
+.chip .av{width:36px;height:36px;border-radius:50%;background:var(--surface-2);
+  border:1.5px solid var(--dept-accent);display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:12px;color:var(--dept-ink);font-weight:700;}
+.chip.human .av{border-width:3px;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--dept-accent);}
+.chip .nm{min-width:0;}
+.chip .nm .n{font-size:14px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chip .nm .r{font-size:12px;font-weight:500;color:var(--dept-ink);}
+.chip .rt{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+/* status pill (status register, saturated) */
+.pill{display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px;border-radius:9px;
+  font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  border:1px solid;}
+.dot{width:7px;height:7px;border-radius:50%;}
+.pill.active{border-color:var(--ok-line);color:var(--ok-fill);} .pill.active .dot{background:var(--ok-fill);}
+.pill.engaged{border-color:oklch(74% 0.10 240);color:var(--info-fill);} .pill.engaged .dot{background:var(--info-fill);}
+.pill.over{border-color:var(--err-fill);color:#fff;background:var(--err-fill);} .pill.over .dot{background:#fff;}
+.pill.seat{border:1px dashed var(--border-strong);color:var(--text-3);} .pill.seat .dot{border:1px dashed var(--text-3);background:transparent;}
+/* load meter (status register) */
+.load{display:flex;align-items:center;gap:6px;}
+.meter{width:48px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.meter i{display:block;height:100%;}
+.meter.ok i{background:var(--ok-fill);} .meter.warn i{background:var(--warn-fill);} .meter.over i{background:var(--err-fill);}
+.load .lbl{font-family:var(--font-mono);font-size:10px;color:var(--text-3);}
+/* seat-open ghost chip */
+.chip.seatopen{border-style:dashed;border-width:1.5px;background:color-mix(in oklch,var(--surface) 50%,transparent);}
+.chip.seatopen .av{border-style:dashed;border-color:var(--dept-line);color:var(--text-3);}
+.chip.seatopen .nm .n{color:var(--text-3);font-weight:500;}
+.chevron{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--dept-line);color:var(--dept-ink);
+  display:flex;align-items:center;justify-content:center;font-size:11px;}
+.countbadge{display:inline-flex;align-items:center;gap:4px;}
+.countbadge .cb{border:1px solid var(--dept-line);color:var(--dept-ink);border-radius:9px;
+  font-family:var(--font-mono);font-size:9.5px;padding:1px 6px;}
+
+.chip-gallery{display:flex;flex-wrap:wrap;gap:30px 22px;align-items:flex-start;}
+.cg-item{display:flex;flex-direction:column;gap:7px;}
+.cg-item .cap{font-family:var(--font-mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;}
+
+/* ---- org chart slice ---- */
+.org{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:22px;overflow-x:auto;}
+.tier{display:flex;justify-content:center;gap:18px;}
+.lanes{display:flex;gap:14px;justify-content:center;margin-top:8px;}
+.lane{border-radius:10px;background:color-mix(in oklch,var(--dept-tint) 55%,transparent);
+  padding:10px 10px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0;}
+.lane-h{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--dept-ink);
+  text-transform:capitalize;font-family:var(--font-mono);letter-spacing:0.04em;}
+.lane-h .roll{margin-left:6px;font-weight:600;color:var(--text-3);}
+.connector{width:1px;height:14px;background:var(--dept-line);margin:0 auto;}
+.mini{width:188px;}
+.mini .chip{width:188px;grid-template-columns:30px 1fr auto;padding:7px 9px;}
+.mini .chip .av{width:30px;height:30px;font-size:11px;}
+.mini .chip .nm .n{font-size:12.5px;}
+.mini .chip .nm .r{font-size:11px;}
+
+/* ---- drawer ---- */
+.drawer{width:420px;border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden;
+  box-shadow:0 20px 50px -20px oklch(20% 0.04 95 / .4);}
+.dr-head{padding:16px 18px;background:color-mix(in oklch,var(--dept-tint) 55%,var(--surface));border-bottom:1px solid var(--dept-line);}
+.dr-head .row1{display:flex;align-items:center;gap:12px;}
+.dr-head .av{width:44px;height:44px;border-radius:50%;background:var(--surface);border:1.5px solid var(--dept-accent);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;color:var(--dept-ink);}
+.dr-head .n{font-size:18px;font-weight:600;}
+.dr-head .t{font-size:13px;color:var(--dept-ink);}
+.dr-head .meta{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);margin-top:8px;}
+.dr-head .actbar{display:flex;align-items:center;gap:8px;margin-top:12px;}
+.btn-actas{margin-left:auto;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;border:1px solid var(--dept-accent);color:var(--dept-accent);background:transparent;
+  border-radius:5px;padding:5px 12px;cursor:pointer;}
+.dr-body{padding:6px 18px 18px;max-height:520px;overflow:auto;}
+.dr-sec{padding:13px 0;border-bottom:1px dashed var(--border);}
+.dr-sec h4{margin:0 0 8px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);font-weight:700;}
+.skill,.perm{display:inline-flex;align-items:center;border:1px solid var(--dept-line);background:var(--dept-tint);
+  color:var(--dept-ink);border-radius:5px;font-family:var(--font-mono);font-size:10.5px;padding:3px 7px;margin:0 5px 5px 0;}
+.navchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--dept-line);border-radius:7px;
+  padding:4px 8px;margin:0 6px 6px 0;font-size:12px;cursor:pointer;background:var(--surface);}
+.navchip .a{color:var(--dept-ink);font-weight:700;}
+.navchip.collab{border-style:dashed;}
+.tasklist .trow{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12.5px;border-top:1px dashed var(--border);}
+.tasklist .trow:first-child{border-top:none;}
+.tid{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);}
+.stamp{font-family:var(--font-mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;
+  border:1px solid;border-radius:3px;padding:1px 5px;margin-left:auto;}
+.stamp.done{color:oklch(48% 0.16 150);border-color:oklch(74% 0.10 150);background:oklch(98% 0.01 150 / .7);}
+.stamp.intest{color:oklch(50% 0.15 220);border-color:oklch(74% 0.10 220);background:oklch(98% 0.01 220 / .7);}
+.bigmeter{display:flex;align-items:center;gap:10px;}
+.bigmeter .meter{width:120px;height:8px;}
+.src{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);}
+
+/* ---- assignment affordances ---- */
+.assgrid{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;}
+.afford{position:relative;}
+.glow{box-shadow:0 0 0 2px var(--ok-line),0 0 16px 2px oklch(70% 0.12 168 / .5);border-radius:12px;}
+.ring-ok{box-shadow:0 0 0 2px var(--ok-fill);border-radius:12px;}
+.ring-rej{box-shadow:0 0 0 2px var(--err-fill);border-radius:12px;}
+.hint{display:inline-block;margin-top:9px;font-family:var(--font-mono);font-size:11px;padding:4px 9px;border-radius:6px;
+  border:1px solid var(--border-strong);background:var(--surface);}
+.hint.ok{color:var(--ok-fill);border-color:var(--ok-line);}
+.hint.warn{color:var(--warn-fill);border-color:oklch(74% 0.10 70);}
+.hint.rej{color:var(--err-fill);border-color:var(--err-fill);}
+
+/* ---- usage panel ---- */
+.usage{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;}
+.usage .uh{display:flex;align-items:baseline;gap:10px;}
+.usage .uh h3{margin:0;font-size:15px;}
+.usage .uh .u{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);}
+.usage .cap{font-size:12px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);
+  border-radius:7px;padding:8px 11px;margin:12px 0 16px;}
+.ubars{display:flex;flex-direction:column;gap:9px;}
+.ubar{display:grid;grid-template-columns:90px 1fr 54px;align-items:center;gap:10px;}
+.ubar .nm{font-size:12px;text-transform:capitalize;color:var(--dept-ink);font-weight:600;}
+.ubar .track{height:14px;border-radius:4px;background:var(--border);overflow:hidden;}
+.ubar .track i{display:block;height:100%;background:var(--dept-accent);}
+.ubar .val{font-family:var(--font-mono);font-size:11px;color:var(--text-3);text-align:right;}
+
+.note{font-size:12px;color:var(--text-3);margin-top:10px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start;}
+@media(max-width:900px){.grid2{grid-template-columns:1fr;}.pal{grid-template-columns:repeat(3,1fr);}}
+
+/* ---- Atelier (persona composer placeholder) ---- */
+.atelier{position:relative;border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:18px;}
+.atelier .ph-tag{position:absolute;top:14px;right:16px;font-family:var(--font-mono);font-size:9px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;color:var(--text-3);border:1px dashed var(--border-strong);
+  border-radius:5px;padding:2px 7px;}
+.at-cols{display:grid;grid-template-columns:1fr 1fr 248px;gap:18px;align-items:start;margin-top:4px;}
+.at-col h4{margin:0 0 9px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--text-3);font-weight:700;}
+.at-step{font-family:var(--font-mono);font-size:9px;color:var(--dept-ink);}
+/* stock = base personas you mix from (persona register, multi-select) */
+.stockchip{display:flex;align-items:center;gap:8px;border:1px solid var(--dept-line);border-radius:8px;
+  background:color-mix(in oklch,var(--dept-tint) 45%,var(--surface));padding:6px 8px;margin-bottom:7px;cursor:default;}
+.stockchip[data-dept]{}
+.stockchip .av{width:26px;height:26px;border-radius:50%;background:var(--surface);border:1.5px solid var(--dept-accent);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--dept-ink);}
+.stockchip .who{min-width:0;flex:1;}
+.stockchip .who .n{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stockchip .who .r{font-size:10.5px;color:var(--dept-ink);font-family:var(--font-mono);}
+.stockchip .tick{width:16px;height:16px;border-radius:4px;border:1px solid var(--dept-line);display:flex;align-items:center;
+  justify-content:center;font-size:10px;color:var(--dept-accent);}
+.stockchip.on .tick{background:var(--dept-accent);color:var(--surface);border-color:var(--dept-accent);}
+.stockchip.off{opacity:.55;}
+/* skill bench = removable skill chips + add box (persona register) */
+.bench{display:flex;flex-wrap:wrap;gap:6px;}
+.skchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--dept-line);background:var(--dept-tint);
+  color:var(--dept-ink);border-radius:6px;font-family:var(--font-mono);font-size:10.5px;padding:3px 6px 3px 8px;}
+.skchip .x{cursor:pointer;color:var(--text-3);font-size:12px;line-height:1;}
+.skchip .src{font-size:8.5px;color:var(--text-3);}
+.skadd{display:inline-flex;align-items:center;gap:6px;border:1px dashed var(--border-strong);border-radius:6px;
+  background:var(--surface);color:var(--text-3);font-family:var(--font-mono);font-size:10.5px;padding:3px 8px;}
+/* seniority segmented control */
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:7px;overflow:hidden;margin-top:4px;}
+.seg button{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  padding:5px 10px;border:0;background:var(--surface);color:var(--text-3);cursor:default;border-right:1px solid var(--border);}
+.seg button:last-child{border-right:0;}
+.seg button.on{background:var(--dept-tint);color:var(--dept-ink);}
+.at-field{display:flex;flex-direction:column;gap:5px;margin-top:12px;}
+.at-field label{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);}
+.at-input{border:1px solid var(--border-strong);border-radius:7px;background:var(--surface-2);padding:7px 9px;font-size:13px;color:var(--text-2);}
+.at-save{margin-top:12px;width:100%;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;border:1px solid var(--dept-accent);background:var(--dept-accent);color:var(--surface);
+  border-radius:7px;padding:9px 12px;cursor:default;opacity:.92;}
+.at-meta{font-family:var(--font-mono);font-size:10px;color:var(--text-3);margin-top:8px;text-align:center;}
+@media(max-width:900px){.at-cols{grid-template-columns:1fr;}}
+/* ---- §8 instancing: persona template -> named agents ---- */
+.inst-flow{display:grid;grid-template-columns:minmax(200px,1fr) auto minmax(280px,1.4fr);gap:16px;align-items:center;}
+.inst-tmpl{border:1px dashed var(--dept-line);border-radius:10px;background:var(--dept-tint);padding:12px;}
+.inst-tmpl .lab{font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;}
+.inst-tmpl .tn{font-size:14px;font-weight:650;}
+.inst-tmpl .tr{font-size:11px;color:var(--dept-ink);font-family:var(--font-mono);margin-top:2px;}
+.inst-tmpl .hire{margin-top:12px;width:100%;font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;border:1px solid var(--dept-accent);background:var(--surface);color:var(--dept-ink);border-radius:7px;padding:7px 10px;cursor:default;}
+.inst-arrow{font-family:var(--font-mono);font-size:11px;color:var(--text-3);text-align:center;white-space:nowrap;}
+.inst-agents{display:flex;flex-direction:column;gap:8px;}
+.agent-card{display:flex;align-items:center;gap:9px;border:1px solid var(--dept-line);border-radius:9px;background:var(--surface);padding:8px 10px;}
+.agent-card .av{width:30px;height:30px;border-radius:50%;background:var(--surface);border:1.5px solid var(--dept-accent);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--dept-ink);flex:none;}
+.agent-card .who{min-width:0;flex:1;}
+.agent-card .who .cn{font-size:13px;font-weight:650;display:flex;align-items:center;gap:6px;}
+.agent-card .who .reroll{font-size:11px;color:var(--text-3);cursor:default;}
+.agent-card .who .sub{font-size:10.5px;color:var(--dept-ink);font-family:var(--font-mono);}
+.agent-card .pill{font-family:var(--font-mono);}
+.agent-card .load .lbl{font-family:var(--font-mono);font-size:10px;color:var(--text-3);}
+.agent-add{display:flex;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--border-strong);border-radius:9px;
+  background:var(--surface);color:var(--text-3);font-family:var(--font-mono);font-size:10.5px;padding:8px;}
+.codetag{font-family:var(--font-mono);font-size:8.5px;color:var(--text-3);background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:1px 4px;}
+@media(max-width:900px){.inst-flow{grid-template-columns:1fr;}.inst-arrow{transform:rotate(90deg);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Crews Views — Design Preview</h1>
+    <span class="badge">mockup · not wired</span>
+    <div class="toggle">
+      <button id="tl" class="on" onclick="setTheme('light')">Light</button>
+      <button id="td" onclick="setTheme('dark')">Dark</button>
+    </div>
+  </header>
+  <p class="sub">Rendered from the locked spec (<code>2026-06-06-crews-views-design-spec.md</code>) using its exact oklch tokens and a real persona slice. Static visual preview for design review — no live data, no interactions wired.</p>
+
+  <!-- 1. PALETTE -->
+  <section>
+    <h2 class="sec-h">1 · Department hue palette (persona register — soft only)</h2>
+    <div class="pal">
+      <div class="swatch dept" style="--dept-hue:var(--dept-exec-hue)"><div class="cap"><b>executive</b></div><div class="bar"></div><div class="meta"><span class="ring"></span>hue 285 · violet</div></div>
+      <div class="swatch dept" style="--dept-hue:var(--dept-tech-hue)"><div class="cap"><b>tech</b></div><div class="bar"></div><div class="meta"><span class="ring"></span>hue 255 · indigo</div></div>
+      <div class="swatch dept" style="--dept-hue:var(--dept-product-hue)"><div class="cap"><b>product</b></div><div class="bar"></div><div class="meta"><span class="ring"></span>hue 330 · rose</div></div>
+      <div class="swatch dept" style="--dept-hue:var(--dept-data-hue)"><div class="cap"><b>data</b></div><div class="bar"></div><div class="meta"><span class="ring"></span>hue 190 · teal</div></div>
+      <div class="swatch dept" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)"><div class="cap"><b>ai</b></div><div class="bar"></div><div class="meta"><span class="ring"></span>hue 45 · bronze</div></div>
+      <div class="swatch dept" style="--dept-hue:var(--dept-it-hue)"><div class="cap"><b>it</b></div><div class="bar"></div><div class="meta"><span class="ring"></span>hue 125 · sage</div></div>
+    </div>
+    <p class="note">Each ≥30° from the reserved status hues (done 150 · in-test 220 · needs-review 70 · reject 25). ai runs at lower chroma so it reads bronze, never warning-yellow.</p>
+  </section>
+
+  <!-- 2. CHIP STATES -->
+  <section>
+    <h2 class="sec-h">2 · Node chip — identity (soft) vs state (saturated) never share an element</h2>
+    <div class="chip-gallery">
+      <div class="cg-item"><span class="cap">active · under capacity</span>
+        <div class="chip dept" data-dept="data" style="--dept-hue:var(--dept-data-hue)">
+          <div class="av">DE</div>
+          <div class="nm"><div class="n">Maya Okonkwo</div><div class="r">data · senior</div></div>
+          <div class="rt"><span class="pill active"><span class="dot"></span>active</span>
+            <div class="load"><span class="meter ok"><i style="width:33%"></i></span><span class="lbl">1/3</span></div></div>
+        </div>
+      </div>
+      <div class="cg-item"><span class="cap">engaged · at capacity</span>
+        <div class="chip dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)">
+          <div class="av">SD</div>
+          <div class="nm"><div class="n">Liang Wei</div><div class="r">tech · senior</div></div>
+          <div class="rt"><span class="pill engaged"><span class="dot"></span>engaged</span>
+            <div class="load"><span class="meter warn"><i style="width:100%"></i></span><span class="lbl">3/3</span></div></div>
+        </div>
+      </div>
+      <div class="cg-item"><span class="cap">overloaded · the one loud state</span>
+        <div class="chip dept" data-dept="product" style="--dept-hue:var(--dept-product-hue)">
+          <div class="av">PM</div>
+          <div class="nm"><div class="n">Sofia Reyes</div><div class="r">product · leader</div></div>
+          <div class="rt"><span class="pill over"><span class="dot"></span>overloaded</span>
+            <div class="load"><span class="meter over"><i style="width:100%"></i></span><span class="lbl">6/5</span></div></div>
+        </div>
+      </div>
+      <div class="cg-item"><span class="cap">human · the operator (root owner)</span>
+        <div class="chip dept human" style="--dept-hue:var(--dept-exec-hue)">
+          <div class="av">RK</div>
+          <div class="nm"><div class="n">Raj (Owner)</div><div class="r">executive · owner</div></div>
+          <div class="rt"><span class="pill active"><span class="dot"></span>active</span></div>
+        </div>
+      </div>
+      <div class="cg-item"><span class="cap">agent · CEO (top agent, under the human)</span>
+        <div class="chip dept" style="--dept-hue:var(--dept-exec-hue)">
+          <div class="av">CE</div>
+          <div class="nm"><div class="n">Chief Executive</div><div class="r">executive · ceo</div></div>
+          <div class="rt"><span class="pill active"><span class="dot"></span>active</span></div>
+        </div>
+      </div>
+      <div class="cg-item"><span class="cap">seat-open · dashed ghost, drop-rejected</span>
+        <div class="chip dept seatopen" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)">
+          <div class="av">+</div>
+          <div class="nm"><div class="n">AI Researcher</div><div class="r">ai · junior</div></div>
+          <div class="rt"><span class="pill seat"><span class="dot"></span>seat open</span></div>
+        </div>
+      </div>
+      <div class="cg-item"><span class="cap">collapsed subtree · count + roll-up load</span>
+        <div class="chip dept" data-dept="it" style="--dept-hue:var(--dept-it-hue)">
+          <div class="av">CL</div>
+          <div class="nm"><div class="n">Aria Novak</div><div class="r">it · leader</div></div>
+          <div class="rt"><span class="countbadge"><span class="cb">+8</span></span>
+            <div class="load"><span class="meter ok"><i style="width:45%"></i></span><span class="lbl">9/20</span></div></div>
+          <div class="chevron">&#9654;</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. ORG CHART -->
+  <section>
+    <h2 class="sec-h">3 · Org chart slice — deterministic layered tree, department swimlanes</h2>
+    <div class="org">
+      <div class="tier">
+        <div class="mini"><div class="chip dept human" style="--dept-hue:var(--dept-exec-hue)">
+          <div class="av">RK</div><div class="nm"><div class="n">Raj (Owner)</div><div class="r">executive · owner · human</div></div>
+          <div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+      </div>
+      <div class="connector"></div>
+      <div class="tier">
+        <div class="mini"><div class="chip dept" style="--dept-hue:var(--dept-exec-hue)">
+          <div class="av">CE</div><div class="nm"><div class="n">Chief Executive</div><div class="r">executive · ceo · agent</div></div>
+          <div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+      </div>
+      <div class="connector"></div>
+      <div class="lanes">
+        <div class="lane dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)">
+          <div class="lane-h">⌗ tech <span class="roll">12/40</span></div>
+          <div class="mini"><div class="chip dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)"><div class="av">CT</div><div class="nm"><div class="n">CTO</div><div class="r">tech · cxo</div></div><div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+          <div class="connector"></div>
+          <div class="mini"><div class="chip dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)"><div class="av">SA</div><div class="nm"><div class="n">Software Arch.</div><div class="r">tech · leader</div></div><div class="rt"><span class="countbadge"><span class="cb">+2</span></span></div></div></div>
+        </div>
+        <div class="lane dept" data-dept="product" style="--dept-hue:var(--dept-product-hue)">
+          <div class="lane-h">◈ product <span class="roll">7/40</span></div>
+          <div class="mini"><div class="chip dept" data-dept="product" style="--dept-hue:var(--dept-product-hue)"><div class="av">CP</div><div class="nm"><div class="n">CPO</div><div class="r">product · cxo</div></div><div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+          <div class="connector"></div>
+          <div class="mini"><div class="chip dept" data-dept="product" style="--dept-hue:var(--dept-product-hue)"><div class="av">PM</div><div class="nm"><div class="n">Product Mgr</div><div class="r">product · leader</div></div><div class="rt"><span class="pill engaged"><span class="dot"></span></span></div></div></div>
+        </div>
+        <div class="lane dept" data-dept="data" style="--dept-hue:var(--dept-data-hue)">
+          <div class="lane-h">▦ data <span class="roll">9/40</span></div>
+          <div class="mini"><div class="chip dept" data-dept="data" style="--dept-hue:var(--dept-data-hue)"><div class="av">CD</div><div class="nm"><div class="n">CDO</div><div class="r">data · cxo</div></div><div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+          <div class="connector"></div>
+          <div class="mini"><div class="chip dept" data-dept="data" style="--dept-hue:var(--dept-data-hue)"><div class="av">DE</div><div class="nm"><div class="n">Data Eng.</div><div class="r">data · leader</div></div><div class="rt"><span class="countbadge"><span class="cb">+2</span></span></div></div></div>
+        </div>
+        <div class="lane dept" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)">
+          <div class="lane-h">✦ ai <span class="roll">5/38</span></div>
+          <div class="mini"><div class="chip dept" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)"><div class="av">CA</div><div class="nm"><div class="n">CAIO</div><div class="r">ai · cxo</div></div><div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+          <div class="connector"></div>
+          <div class="mini"><div class="chip dept seatopen" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)"><div class="av">+</div><div class="nm"><div class="n">AI Researcher</div><div class="r">ai · junior</div></div><div class="rt"><span class="pill seat"><span class="dot"></span></span></div></div></div>
+        </div>
+        <div class="lane dept" data-dept="it" style="--dept-hue:var(--dept-it-hue)">
+          <div class="lane-h">▤ it <span class="roll">11/40</span></div>
+          <div class="mini"><div class="chip dept" data-dept="it" style="--dept-hue:var(--dept-it-hue)"><div class="av">CI</div><div class="nm"><div class="n">CIO</div><div class="r">it · cxo</div></div><div class="rt"><span class="pill active"><span class="dot"></span></span></div></div></div>
+          <div class="connector"></div>
+          <div class="mini"><div class="chip dept" data-dept="it" style="--dept-hue:var(--dept-it-hue)"><div class="av">SE</div><div class="nm"><div class="n">Security/Comp.</div><div class="r">it · leader</div></div><div class="rt"><span class="pill engaged"><span class="dot"></span></span></div></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Human owner (Raj) is the root; the CEO agent sits one level below and leads the five CXOs. Each CXO subtree sits in a soft-tinted swimlane. Only <code>reports_to</code> edges drawn; juniors collapsed by default (the <code>+2</code> badges). The human node carries the 3px dashed-inner ring; every other node (incl. the CEO) is an agent. Loud states (overload) are the only saturated fills.</p>
+  </section>
+
+  <!-- 4 + 5 side by side -->
+  <section>
+    <h2 class="sec-h">4 · Persona detail drawer &nbsp;·&nbsp; 5 · Assignment affordances</h2>
+    <div class="grid2">
+      <!-- drawer -->
+      <div class="drawer dept" data-dept="data" style="--dept-hue:var(--dept-data-hue)">
+        <div class="dr-head">
+          <div class="row1">
+            <div class="av">DE</div>
+            <div><div class="n">Maya Okonkwo</div><div class="t">Senior Data Engineer</div></div>
+          </div>
+          <div class="meta">data-data-engineer-senior · data · senior · agent</div>
+          <div class="actbar">
+            <span class="pill active"><span class="dot"></span>active</span>
+            <div class="load"><span class="meter ok"><i style="width:33%"></i></span><span class="lbl">1/3</span></div>
+            <button class="btn-actas">Switch</button>
+          </div>
+        </div>
+        <div class="dr-body">
+          <div class="dr-sec"><h4>Summary</h4><div>Owns critical ELT pipelines and warehouse models; backward-compat target for the legacy <code>be</code> profile.</div></div>
+          <div class="dr-sec"><h4>Core Skills</h4>
+            <span class="skill">ETL/ELT</span><span class="skill">SQL</span><span class="skill">dbt</span><span class="skill">Airflow</span><span class="skill">data modeling</span><span class="skill">streaming</span></div>
+          <div class="dr-sec"><h4>Reports To</h4><span class="navchip">↑ <span class="a">Data Eng. Leader</span></span></div>
+          <div class="dr-sec"><h4>Reportees</h4><span class="navchip">↓ <span class="a">Data Eng. Junior</span></span></div>
+          <div class="dr-sec"><h4>Collaborates With</h4>
+            <span class="navchip collab dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)">DevOps/SRE</span>
+            <span class="navchip collab dept" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)">MLOps Eng.</span></div>
+          <div class="dr-sec"><h4>Permissions</h4><span class="perm">tasks: edit</span><span class="perm">plans: comment</span><span class="perm">verdicts: read</span></div>
+          <div class="dr-sec"><h4>Assigned Tasks</h4><div class="tasklist">
+            <div class="trow"><span class="tid">AG-P8.4</span> API write layer <span class="stamp done">done</span></div>
+            <div class="trow"><span class="tid">KH-P2.5</span> Save state machine <span class="stamp intest">in-test</span></div></div></div>
+          <div class="dr-sec"><h4>Load &amp; Engagement</h4>
+            <div class="bigmeter"><span class="meter ok"><i style="width:33%"></i></span><span class="lbl">1 / 3 capacity</span></div>
+            <div class="note">model: pay-as-you-use · 1 effort unit / task <em>(simulated)</em></div></div>
+          <div class="dr-sec" style="border-bottom:none"><h4>Source</h4><span class="src">roles/crews/data/data-engineer/senior/skill.md</span></div>
+        </div>
+      </div>
+
+      <!-- assignment affordances -->
+      <div class="assgrid" style="display:flex;flex-direction:column;gap:24px;">
+        <div class="afford">
+          <span class="cap" style="font-family:var(--font-mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;">skill-fit match · valid drop</span>
+          <div class="chip dept glow" data-dept="data" style="--dept-hue:var(--dept-data-hue);margin-top:7px;">
+            <div class="av">DE</div><div class="nm"><div class="n">Maya Okonkwo</div><div class="r">data · senior</div></div>
+            <div class="rt"><span class="pill active"><span class="dot"></span>active</span>
+              <div class="load"><span class="meter ok"><i style="width:33%"></i></span><span class="lbl">1/3</span></div></div></div>
+          <span class="hint ok">2/3 — room for 1 · strong skill match</span>
+        </div>
+        <div class="afford">
+          <span class="cap" style="font-family:var(--font-mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;">would overload · allowed with warning</span>
+          <div class="chip dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue);margin-top:7px;">
+            <div class="av">SD</div><div class="nm"><div class="n">Liang Wei</div><div class="r">tech · senior</div></div>
+            <div class="rt"><span class="pill engaged"><span class="dot"></span>engaged</span>
+              <div class="load"><span class="meter warn"><i style="width:100%"></i></span><span class="lbl">3/3</span></div></div></div>
+          <span class="hint warn">3/3 — would overload</span>
+        </div>
+        <div class="afford">
+          <span class="cap" style="font-family:var(--font-mono);font-size:9.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;">seat-open · drop rejected</span>
+          <div class="chip dept seatopen ring-rej" data-dept="ai" style="--dept-hue:var(--dept-ai-hue);margin-top:7px;">
+            <div class="av">+</div><div class="nm"><div class="n">AI Researcher</div><div class="r">ai · junior</div></div>
+            <div class="rt"><span class="pill seat"><span class="dot"></span>seat open</span></div></div>
+          <span class="hint rej">⊘ seat-open — staff it first</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. USAGE -->
+  <section>
+    <h2 class="sec-h">6 · Usage panel — simulated effort, never money</h2>
+    <div class="usage">
+      <div class="uh"><h3>Usage (simulated effort)</h3><span class="u">effort units · this project</span></div>
+      <div class="cap">Representational only. Agentarium simulates agent/persona effort to help you balance load — it never processes or reflects real money.</div>
+      <div class="ubars">
+        <div class="ubar dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)"><span class="nm">tech</span><span class="track"><i style="width:84%"></i></span><span class="val">42 u</span></div>
+        <div class="ubar dept" data-dept="data" style="--dept-hue:var(--dept-data-hue)"><span class="nm">data</span><span class="track"><i style="width:58%"></i></span><span class="val">29 u</span></div>
+        <div class="ubar dept" data-dept="product" style="--dept-hue:var(--dept-product-hue)"><span class="nm">product</span><span class="track"><i style="width:40%"></i></span><span class="val">20 u</span></div>
+        <div class="ubar dept" data-dept="it" style="--dept-hue:var(--dept-it-hue)"><span class="nm">it</span><span class="track"><i style="width:26%"></i></span><span class="val">13 u</span></div>
+        <div class="ubar dept" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)"><span class="nm">ai</span><span class="track"><i style="width:14%"></i></span><span class="val">7 u</span></div>
+      </div>
+      <p class="note">Quantity reads as a measurement (saturated bars in the data register); department identity stays soft. No "$", "cost", or "spend" anywhere — a hard requirement.</p>
+    </div>
+  </section>
+
+  <!-- 7. ATELIER -->
+  <section>
+    <h2 class="sec-h">7 · Atelier — compose a new crew member (placeholder)</h2>
+    <div class="atelier" style="--dept-hue:var(--dept-data-hue)" data-dept="data">
+      <span class="ph-tag">placeholder · not wired</span>
+      <p class="note" style="margin:0 0 16px;max-width:64ch">Mix skills from existing crew, add/remove from the global skill vocabulary, re-level seniority, then save a <b>custom</b> crew member (<code>kind: agent</code>, id <code>composed-*</code>) that's assignable like any persona. Persona register only — no status colors here.</p>
+      <div class="at-cols">
+
+        <!-- 1. STOCK: pick base personas to mix -->
+        <div class="at-col">
+          <h4><span class="at-step">01 ·</span> Stock — mix from</h4>
+          <div class="stockchip on" data-dept="ai" style="--dept-hue:var(--dept-ai-hue)">
+            <div class="av">ML</div>
+            <div class="who"><div class="n">Sr. ML Engineer</div><div class="r">ai · senior</div></div>
+            <span class="tick">&#10003;</span>
+          </div>
+          <div class="stockchip on" data-dept="data" style="--dept-hue:var(--dept-data-hue)">
+            <div class="av">DA</div>
+            <div class="who"><div class="n">Data Architect</div><div class="r">data · leader</div></div>
+            <span class="tick">&#10003;</span>
+          </div>
+          <div class="stockchip off" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)">
+            <div class="av">DV</div>
+            <div class="who"><div class="n">DevOps / SRE</div><div class="r">tech · senior</div></div>
+            <span class="tick"></span>
+          </div>
+          <span class="skadd" style="margin-top:4px">+ add persona…</span>
+        </div>
+
+        <!-- 2. BENCH: skills + seniority -->
+        <div class="at-col">
+          <h4><span class="at-step">02 ·</span> Skill bench — add / remove</h4>
+          <div class="bench">
+            <span class="skchip">Feature engineering <span class="src">ai</span><span class="x">&times;</span></span>
+            <span class="skchip">Model training &amp; eval <span class="src">ai</span><span class="x">&times;</span></span>
+            <span class="skchip">Data modeling <span class="src">data</span><span class="x">&times;</span></span>
+            <span class="skchip">Pipeline design <span class="src">data</span><span class="x">&times;</span></span>
+            <span class="skchip">Vector stores <span class="src">+new</span><span class="x">&times;</span></span>
+            <span class="skadd">+ add skill…</span>
+          </div>
+          <div class="at-field">
+            <label>Seniority — sets capacity default</label>
+            <div>
+              <span class="seg">
+                <button>Junior</button>
+                <button class="on">Senior</button>
+                <button>Leader</button>
+              </span>
+              <span class="load" style="display:inline-flex;margin-left:10px;vertical-align:middle"><span class="meter ok"><i style="width:0%"></i></span><span class="lbl">capacity 3</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. RESULT: identity + save + preview -->
+        <div class="at-col">
+          <h4><span class="at-step">03 ·</span> Save as crew member</h4>
+          <div class="at-field" style="margin-top:0">
+            <label>Name</label>
+            <div class="at-input">ML Platform Engineer</div>
+          </div>
+          <div class="at-field">
+            <label>Department · reports to</label>
+            <div class="at-input">data · CDO</div>
+          </div>
+          <div style="margin-top:14px">
+            <div class="cap" style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">Live preview</div>
+            <div class="chip dept" data-dept="data" style="--dept-hue:var(--dept-data-hue);width:100%">
+              <div class="av">MP</div>
+              <div class="nm"><div class="n">ML Platform Engineer</div><div class="r">data · senior · composed</div></div>
+              <div class="rt"><span class="pill active"><span class="dot"></span>available</span>
+                <div class="load"><span class="meter ok"><i style="width:0%"></i></span><span class="lbl">0/3</span></div></div>
+            </div>
+          </div>
+          <button class="at-save">Save as crew member</button>
+          <div class="at-meta">draft-only until hard-save · 5 skills · seeds owner_id pool</div>
+        </div>
+
+      </div>
+      <p class="note">Three-step bench: pick stock personas (multi-select, persona register) → curate the unioned skills (each chip tagged with its source dept or <code>+new</code>) → set seniority + identity + manager and save. Composed members live outside the canonical org tree as <code>composed-*</code> nodes, attach under a chosen <code>reports_to</code>, and are draft-only (localStorage) until P2 hard-save extends the editable set. No saturated status fills except the result chip's own state pill.</p>
+    </div>
+  </section>
+
+  <!-- 8. INSTANCING: persona template -> named agents -->
+  <section style="--dept-hue:var(--dept-tech-hue)">
+    <h3>8 · Instancing — personas are templates, agents are named instances</h3>
+    <div class="atelier" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)">
+      <span class="ph-tag">placeholder · not wired</span>
+      <p class="note" style="margin:0 0 14px">A persona is a reusable <strong>template</strong>. You <strong>hire</strong> it to create a named <strong>agent</strong> — and you can hire the same persona many times (3 SDE, 2 SPM, 3 QA, 1 SDP). New agents get an auto <strong>codename</strong> from a celestial pool (deduped, rerollable ↻); the user can rename to anything.</p>
+      <div class="inst-flow">
+        <div class="inst-tmpl" data-dept="tech">
+          <div class="lab">Persona template</div>
+          <div class="tn">Senior Software Engineer</div>
+          <div class="tr">tech · senior · capacity 3</div>
+          <button class="hire">+ Hire agent from this persona</button>
+        </div>
+        <div class="inst-arrow">hire →<br>(×3)</div>
+        <div class="inst-agents">
+          <div class="agent-card" data-dept="tech">
+            <div class="av">VG</div>
+            <div class="who"><div class="cn">Vega <span class="reroll">↻</span> <span class="codetag">codename</span></div><div class="sub">Senior Software Engineer</div></div>
+            <span class="pill engaged"><span class="dot"></span>engaged</span>
+            <div class="load"><span class="lbl">2/3</span></div>
+          </div>
+          <div class="agent-card" data-dept="tech">
+            <div class="av">AL</div>
+            <div class="who"><div class="cn">Altair <span class="reroll">↻</span> <span class="codetag">codename</span></div><div class="sub">Senior Software Engineer</div></div>
+            <span class="pill active"><span class="dot"></span>available</span>
+            <div class="load"><span class="lbl">0/3</span></div>
+          </div>
+          <div class="agent-card" data-dept="tech">
+            <div class="av">RA</div>
+            <div class="who"><div class="cn">Raman <span class="codetag">custom name</span></div><div class="sub">Senior Software Engineer</div></div>
+            <span class="pill active"><span class="dot"></span>available</span>
+            <div class="load"><span class="lbl">1/3</span></div>
+          </div>
+          <div class="agent-add">+ instance another (next codename: Rigel)</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:18px;margin-top:18px;border-top:1px solid var(--border);padding-top:16px">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Dormant — 0 active agents (faded)</div>
+          <div class="chip dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue);opacity:.55">
+            <div class="av">QA</div>
+            <div class="nm"><div class="n">QA Engineer</div><div class="r">tech · senior · unstaffed</div></div>
+            <div class="rt"><span class="codetag">hire to activate</span></div>
+          </div>
+          <div style="margin-top:8px"><span style="font-family:var(--font-mono);font-size:10px;border:1px solid oklch(74% 0.10 240);color:var(--info-fill);border-radius:999px;padding:2px 8px">▣ 1 pending-staffing</span></div>
+          <p class="note" style="margin-top:8px">A faded role still accepts <strong>delegated</strong> tasks — they queue until the leader hires.</p>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Active — agent-count badge expands to agents + their tasks</div>
+          <div class="chip dept" data-dept="tech" style="--dept-hue:var(--dept-tech-hue)">
+            <div class="av">SE</div>
+            <div class="nm"><div class="n">Senior Software Engineer</div><div class="r">tech · senior</div></div>
+            <div class="rt"><span style="font-family:var(--font-mono);font-size:10px;border:1px solid var(--dept-line);color:var(--dept-ink);border-radius:999px;padding:2px 8px">◍ 3 agents ▾</span>
+              <div class="load"><span class="meter ok"><i style="width:33%"></i></span><span class="lbl">Σ 3/9</span></div></div>
+          </div>
+          <div class="inst-agents" style="margin-top:8px;padding-left:16px;border-left:2px solid var(--dept-line)">
+            <div class="agent-card" data-dept="tech"><div class="av">VG</div><div class="who"><div class="cn">Vega</div><div class="sub">2 tasks</div></div><span class="pill engaged"><span class="dot"></span>engaged</span><div class="load"><span class="lbl">2/3</span></div></div>
+            <div class="agent-card" data-dept="tech"><div class="av">AL</div><div class="who"><div class="cn">Altair</div><div class="sub">0 tasks</div></div><span class="pill active"><span class="dot"></span>available</span><div class="load"><span class="lbl">0/3</span></div></div>
+            <div class="agent-card" data-dept="tech"><div class="av">RA</div><div class="who"><div class="cn">Raman</div><div class="sub">1 task</div></div><span class="pill active"><span class="dot"></span>available</span><div class="load"><span class="lbl">1/3</span></div></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Personas render <strong>faded until staffed</strong>; once a persona has ≥1 active agent it activates and shows a persona-register <code>◍ count</code> badge that expands to its agents (each with its own status pill, load, and task count). <strong>Two-level assignment:</strong> drop a task on an <strong>agent</strong> mini-chip (direct) or on the <strong>persona</strong> node (delegated → the persona's leader triages it onto an existing agent or hires a new one). <code>owner_id</code> may point at an agent (staffed = load) or a persona (pending-staffing = demand). Agents live outside the canonical tree, draft-only until P2 hard-save — never mutating <code>skill.md</code> / <code>crews-index.json</code>. Spec §2.5 / §7.5 / §12.</p>
+    </div>
+  </section>
+</div>
+<script>
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('tl').classList.toggle('on', t==='light');
+  document.getElementById('td').classList.toggle('on', t==='dark');
+}
+const p = new URLSearchParams(location.search).get('theme');
+if(p) setTheme(p);
+</script>
+</body>
+</html>

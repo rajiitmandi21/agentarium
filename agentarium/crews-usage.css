@@ -1,0 +1,290 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * Crews — Usage (simulated effort) panel — AG-P7.8, Slice 4
+ *
+ * Scoped to .crews-usage-* ONLY. Does NOT touch styles.css (owned elsewhere).
+ *
+ * Register discipline: the effort BARS are status/data register (saturated) so
+ * a quantity reads as a measurement, not identity. Department identity stays
+ * SOFT — a department row carries its --dept-hue only as a faint name tint and
+ * hairline; the bar itself uses the three saturated BAND hues (low/med/high),
+ * never a department fill.
+ *
+ * This is REPRESENTATIONAL effort, never money — there are no currency, cost,
+ * or financial styles anywhere here.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+.crews-usage {
+  --cu-low:  oklch(70% 0.13 200);   /* calm low-intent band */
+  --cu-med:  oklch(62% 0.16 240);   /* mid-intent band */
+  --cu-high: oklch(58% 0.19 290);   /* high-intent band */
+  --cu-bar-bg: var(--surface-2, oklch(95% 0.005 80));
+
+  display: block;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, oklch(85% 0.01 80));
+  border-radius: 12px;
+  padding: 18px 18px 20px;
+  margin-top: 14px;
+}
+
+/* ── Header (locked copy) ── */
+.crews-usage-head { margin-bottom: 14px; }
+
+.crews-usage-head-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.crews-usage-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text, oklch(22% 0.01 80));
+}
+
+.crews-usage-total { white-space: nowrap; }
+
+.crews-usage-units {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2, oklch(40% 0.01 80));
+}
+.crews-usage-units strong {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 13px;
+  color: var(--text, oklch(22% 0.01 80));
+}
+.crews-usage-unit-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3, oklch(58% 0.01 80));
+}
+
+.crews-usage-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-3, oklch(58% 0.01 80));
+  border: 1px dashed var(--border-strong, oklch(78% 0.01 80));
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.crews-usage-caption {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-3, oklch(58% 0.01 80));
+  max-width: 62ch;
+}
+
+/* ── Band legend ── */
+.crews-usage-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.crews-usage-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2, oklch(40% 0.01 80));
+}
+.crews-usage-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* ── Blocks / subheads ── */
+.crews-usage-block { margin-top: 18px; }
+.crews-usage-subhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3, oklch(58% 0.01 80));
+}
+.crews-usage-none {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3, oklch(58% 0.01 80));
+  font-style: italic;
+}
+
+/* ── Rows (department + persona) ── */
+.crews-usage-list { list-style: none; margin: 0; padding: 0; }
+.crews-usage-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border, oklch(90% 0.005 80));
+}
+.crews-usage-row:last-child { border-bottom: none; }
+
+.crews-usage-rowname {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text, oklch(22% 0.01 80));
+  /* department identity = SOFT ink only (persona register) */
+  border-left: 2px solid var(--dept-line, oklch(84% 0.06 var(--dept-hue, 255)));
+  padding-left: 8px;
+  min-width: 0;
+  /* nowrap lets text-overflow:ellipsis actually engage on long names
+     (a wrapping flex child never overflows, so ellipsis can't trigger). */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crews-usage-rowdept {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--dept-ink, oklch(40% 0.13 var(--dept-hue, 255)));
+  text-transform: capitalize;
+}
+
+.crews-usage-lean-list { counter-reset: lean; }
+
+/* ── The effort bar (status/data register — saturated bands) ── */
+.crews-usage-bar {
+  display: flex;
+  align-items: stretch;
+  height: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--cu-bar-bg);
+  min-width: 60px;
+}
+.crews-usage-seg { height: 100%; display: block; transition: width 0.2s ease; }
+.crews-usage-seg-low  { background: var(--cu-low); }
+.crews-usage-seg-med  { background: var(--cu-med); }
+.crews-usage-seg-high { background: var(--cu-high); }
+
+.crews-usage-legend-low  .crews-usage-swatch { background: var(--cu-low); }
+.crews-usage-legend-med  .crews-usage-swatch { background: var(--cu-med); }
+.crews-usage-legend-high .crews-usage-swatch { background: var(--cu-high); }
+
+/* ── Empty / degraded coach state ── */
+.crews-usage-empty {
+  text-align: center;
+  padding: 18px 12px;
+  margin: 6px 0 4px;
+  border: 1px dashed var(--border-strong, oklch(80% 0.01 80));
+  border-radius: 10px;
+  background: var(--surface-2, oklch(97% 0.004 80));
+}
+.crews-usage-empty-glyph {
+  font-size: 22px;
+  color: var(--text-3, oklch(62% 0.01 80));
+  line-height: 1;
+}
+.crews-usage-empty-title {
+  margin: 8px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text, oklch(22% 0.01 80));
+}
+.crews-usage-empty-coach {
+  margin: 0 auto;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3, oklch(58% 0.01 80));
+  max-width: 46ch;
+}
+
+/* ── Idle list ── */
+.crews-usage-idle {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.crews-usage-idle-count {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3, oklch(58% 0.01 80));
+  background: var(--surface-2, oklch(96% 0.004 80));
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.crews-usage-idle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--dept-ink, oklch(40% 0.13 var(--dept-hue, 255)));
+  /* idle = de-emphasized, persona register (soft tint), opacity dial-down */
+  background: var(--dept-tint, oklch(96% 0.03 var(--dept-hue, 255)));
+  border: 1px solid var(--dept-line, oklch(84% 0.06 var(--dept-hue, 255)));
+  border-radius: 999px;
+  padding: 3px 9px;
+  opacity: 0.72;
+}
+.crews-usage-idle-tier {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3, oklch(58% 0.01 80));
+}
+.crews-usage-more {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--text-3, oklch(58% 0.01 80));
+}
+
+/* ── Dark theme overrides ── */
+[data-theme="dark"] .crews-usage {
+  --cu-low:  oklch(72% 0.12 200);
+  --cu-med:  oklch(68% 0.15 240);
+  --cu-high: oklch(64% 0.18 290);
+  --cu-bar-bg: oklch(30% 0.01 80);
+  background: var(--surface, oklch(20% 0.01 80));
+  border-color: var(--border, oklch(35% 0.01 80));
+}
+[data-theme="dark"] .crews-usage-row { border-bottom-color: var(--border, oklch(32% 0.01 80)); }
+[data-theme="dark"] .crews-usage-empty,
+[data-theme="dark"] .crews-usage-idle-count { background: var(--surface-2, oklch(26% 0.01 80)); }
+[data-theme="dark"] .crews-usage-idle-chip { opacity: 0.8; }
+
+/* ── Mobile ── */
+@media (max-width: 860px) {
+  .crews-usage { padding: 14px 12px 16px; }
+  .crews-usage-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "name units"
+      "bar  bar";
+    gap: 6px 10px;
+  }
+  .crews-usage-rowname { grid-area: name; }
+  .crews-usage-units   { grid-area: units; justify-self: end; }
+  .crews-usage-bar     { grid-area: bar; }
+  .crews-usage-caption { max-width: none; }
+  .crews-usage-head-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+}

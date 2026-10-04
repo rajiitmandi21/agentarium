@@ -1,0 +1,57 @@
+{
+  "title": "Agentarium demo — Phase 1",
+  "subtitle": "Synthetic example workspace · connect your data to get started",
+  "phase_status": "in_progress",
+  "last_updated": "2026-10-04T00:00:00Z",
+  "human_reviews": [],
+  "tasks": [
+    {
+      "id": "DEMO-P1.1",
+      "title": "Connect your project folder",
+      "status": "completed",
+      "priority": "p1",
+      "description": "Synthetic example: use Connect your data to link your own project-management folder.",
+      "owner_id": "human-raj",
+      "pm_status": "done",
+      "blockers": [],
+      "reviews": [],
+      "subtasks": [],
+      "plan_ids": [
+        "2026-10-04-phase1-demo-workspace"
+      ],
+      "code_updated_at": "2026-10-04T00:00:00Z"
+    },
+    {
+      "id": "DEMO-P1.2",
+      "title": "Try task editing and export",
+      "status": "in_progress",
+      "priority": "p1",
+      "description": "Turn on Edit, select this task, update its fields and export a JSON snapshot. Linked folders can Save locally.",
+      "owner_id": "fe",
+      "pm_status": "",
+      "blockers": [],
+      "reviews": [],
+      "subtasks": [],
+      "plan_ids": [
+        "2026-10-04-phase1-demo-workspace"
+      ],
+      "code_updated_at": "2026-10-04T00:00:00Z"
+    },
+    {
+      "id": "DEMO-P1.3",
+      "title": "Explore project views",
+      "status": "todo",
+      "priority": "p2",
+      "description": "Browse the sample plan, handoff, decision, crews, review queue and Atlas. All demo content is synthetic.",
+      "owner_id": "spm",
+      "pm_status": "",
+      "blockers": [],
+      "reviews": [],
+      "subtasks": [],
+      "plan_ids": [
+        "2026-10-04-phase1-demo-workspace"
+      ],
+      "code_updated_at": "2026-10-04T00:00:00Z"
+    }
+  ]
+}

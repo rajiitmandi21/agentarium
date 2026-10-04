@@ -1,0 +1,31 @@
+{
+  "name": "agentarium",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "test:docker": "node scripts/test-docker-container.js",
+    "test:docker-write": "node scripts/test-docker-write.js",
+    "build": "node scripts/build-release.js",
+    "test:release": "node scripts/test-release-package.js",
+    "deploy": "npm run build && wrangler deploy",
+    "preview:release": "python3 -m http.server 4748 --bind 127.0.0.1 --directory dist"
+  },
+  "devDependencies": {
+    "@babel/standalone": "^7.29.7",
+    "playwright": "^1.60.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "wrangler": "4.147.0"
+  },
+  "dependencies": {
+    "@langchain/anthropic": "1.5.11",
+    "@langchain/google-genai": "2.3.2",
+    "@langchain/langgraph": "1.4.17",
+    "@langchain/langgraph-checkpoint-sqlite": "1.0.3",
+    "@langchain/openai": "1.5.6"
+  },
+  "version": "0.3.0",
+  "license": "MIT",
+  "description": "A local-first project command center for human-led AI agent teams"
+}
