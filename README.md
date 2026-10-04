@@ -11,6 +11,9 @@ dispatch currently requires the optional local API.
 [Release capabilities and free Cloudflare deployment](docs/first-release.md) ·
 [MIT license](LICENSE) · [Contributing](CONTRIBUTING.md)
 
+Source: [rajiitmandi21/agentarium](https://github.com/rajiitmandi21/agentarium).
+Hosted app target: [Agentarium](https://rajiitmandi21.github.io/agentarium/).
+
 ```sh
 npm ci
 npm run build
@@ -18,8 +21,8 @@ npm run preview:release
 ```
 
 The public build includes production scripts and synthetic example data only.
-Deploy `dist/` with `npm run deploy` after Cloudflare login. Publication URLs will
-be added once the GitHub repository and hosted site exist.
+Deploy `dist/` with `npm run deploy` after Cloudflare login. The first deployment
+uses free GitHub Pages; Cloudflare deployment is also configured.
 
 GitHub Pages also provides free hosting for the public repository. The included
 Pages workflow builds and publishes only `dist/`; enable Pages with GitHub Actions
